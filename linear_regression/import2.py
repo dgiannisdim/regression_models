@@ -7,7 +7,7 @@ from sklearn import preprocessing
 
 
 
-data = pd.read_csv(r'C:\regression models\imoprt_data/final_dataset.csv')
+data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset.csv')
 
 pd.set_option('display.max_columns', 99)
 pd.set_option('display.max_row', 999)

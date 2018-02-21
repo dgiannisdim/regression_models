@@ -11,7 +11,7 @@ pd.set_option('display.max_columns', 99)
 pd.set_option('display.max_row', 999)
 
 
-data = pd.read_csv(r'C:\regression models\imoprt_data/final.csv')
+data = pd.read_csv(r'C:\regression_models\linear_regression/final.csv')
 del data['Unnamed: 0']
 data = data.dropna()
 data = data.sort_values(by=['household_id', 'month'])
@@ -19,7 +19,9 @@ data = data.reset_index(drop=True)
 
 
 
+
 print(data.head())
+
 
 '''
 X = data[f]

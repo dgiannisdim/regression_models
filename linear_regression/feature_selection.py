@@ -8,9 +8,10 @@ import sklearn
 
 
 
-data = pd.read_csv(r'C:\regression models\imoprt_data/final.csv')
+data = pd.read_csv(r'C:\regression_models\linear_regression/final.csv')
 del data['Unnamed: 0']
 data = data.dropna()
+
 
 
 X = data.iloc[:, [30,31]]
