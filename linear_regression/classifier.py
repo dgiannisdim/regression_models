@@ -17,6 +17,8 @@ data = data.dropna()
 data = data.sort_values(by=['household_id', 'month'])
 data = data.reset_index(drop=True)
 
+
+
 print(data.head())
 
 '''
