@@ -23,7 +23,7 @@ def explore(data):
     print('\n')
     print(data.shape)
 
-explore(data)
+#explore(data)
 
 
 '''
@@ -34,13 +34,13 @@ writer.save()
 '''
 
 
-#remove useless features
+#remove useless data
 def del_useless_features(data, columns):
     return data.drop(columns, axis=1)
 
 
 
-#define useless features
+#define useless data
 columns = ['Id', 'eui64', 'appliance_type', 'usage_in_kwh',
            'usage_frequency', 'score', 'period_first', 'period_last',
            'snapshot_taken_at', 'calculated_until', 'seconds_of_data_missing']
@@ -58,7 +58,7 @@ data2 = del_useless_features(data2,columns2)
 #print(data2['household_id'].value_counts())
 
 
-#check features with few values
+#check data with few values
 #print(sum(float(num) > 0 for num in data['sauna']))
 arr=np.array(data['sauna']).astype(float)
 num_sauna = len(arr[arr > 0])
@@ -79,12 +79,13 @@ features2 = list(data2.columns.values)
 del features2[0:2]
 
 
-for f in features2:
-    data2[f] = (data2[f]/data2['electricity_total'])*100
+def transfotm_to_percentage(data, features, base):
+    for f in features:
+        data[f] = (data[f]/data[base])*100
+    data = data.dropna()
+    return data
 
 
-#remove NaN values (0 the raw data)
-data2 = data2.dropna()
 
 #sort data2 by household id, month
 data2 = data2.sort_values(by=['household_id', 'month'])
@@ -99,8 +100,8 @@ del features[0]
 
 '''
 #create dataframe with installation columns
-e = pd.DataFrame(np.nan, index=range(0, len(data2.index)), columns=features)
-for f in features:
+e = pd.DataFrame(np.nan, index=range(0, len(data2.index)), columns=data)
+for f in data:
     for i in range(0, len(data2.index)):
         for j in range(0,len(data.index)):
             if data2['household_id'][i] == data['household_id'][j]:
@@ -109,10 +110,9 @@ for f in features:
 
 
 #merge dataframes into a final
-data2[features] = e
+data2[data] = e
 print(data2)
-data2.to_csv('final.csv')
+data2.to_csv('final_values.csv')
 
 '''
-
 

@@ -1,35 +1,33 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from pandas.plotting import scatter_matrix
-from sklearn import preprocessing
+from visualization import del_useless_features
+
+
+data = pd.read_csv(r'C:\Energy_Consumption_Data\Installation Metadata.csv')
+data2 = pd.read_csv(r'C:\Energy_Consumption_Data\Disaggregation Results.csv')
+
+pd.set_option('display.max_columns', 50)
+pd.set_option('display.max_row', 99)
 
 
 
 
-data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset.csv')
+#define useless data
+columns = ['Id', 'eui64', 'appliance_type', 'usage_in_kwh',
+           'usage_frequency', 'score', 'period_first', 'period_last',
+           'snapshot_taken_at', 'calculated_until', 'seconds_of_data_missing']
 
-pd.set_option('display.max_columns', 99)
-pd.set_option('display.max_row', 999)
-
-del data['Unnamed: 0']
-data = data.dropna()
-
-data = data.sort_values(by=['household_id', 'month'])
-data = data.reset_index(drop=True)
+columns2 = ['eui64', 'disaggregation_id', 'year', 'gas_space_heating',
+           'gas_water_heating', 'gas_cooking', 'gas_total', 'description']
 
 
 
+data = del_useless_features(data2,columns2)
+data2 = del_useless_features(data2,columns2)
 
-print(data)
+
+
 
 
 
 #data = pd.get_dummies(data)
-
-
-#data.to_csv('final_dataset.csv')
-
-
-#scatter_matrix(data)
-#plt.show()
