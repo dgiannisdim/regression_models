@@ -20,6 +20,7 @@ X = data.iloc[: , 14:35]
 y = data['electricity_cooking']
 y=y.astype('int')
 
+
 X_train, X_test, y_train, y_test = train_test_split(X, y)
 
 scaler = StandardScaler()
