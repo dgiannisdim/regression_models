@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn import linear_model
+from sklearn import linear_model, preprocessing, cross_validation, svm
 from sklearn.metrics import mean_squared_error, r2_score
 import statsmodels.formula.api as smf
 import statsmodels.api as sm
@@ -22,7 +22,7 @@ data = data.reset_index(drop=True)
 
 data = pd.get_dummies(data)
 
-
+'''
 #create model with OLS method of statsmodels
 f = list(data.columns.values)
 f = f[77 : 85]
@@ -37,7 +37,7 @@ print(res.summary())
 
 
 
-'''
+
 #create model with formula method of statsmodels (flexible)
 Y = 'electricity_cooking ~ '
 X = ''
@@ -65,17 +65,23 @@ mod = smf.ols(formula='electricity_cooking ~ C(oven) + C(microwave) + C(occupant
 res = mod.fit()
 
 print(res.summary())
+'''
 
 
 #create model with sklearn
-#data = pd.get_dummies(data)
 
-lm = linear_model.LinearRegression()
-model = lm.fit(X,y)
-predictions = lm.predict(X)
-#print(sklearn.metrics.r2_score)
+X = data.iloc[:, 15:45]
+y = data['electricity_cooking']
+X = preprocessing.scale(X)
+X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.2)
 
-'''
+clf = linear_model.LinearRegression()
+clf.fit(X_train,y_train)
+predictions = clf.predict(X_test)
+accuracy = clf.score(X_test, y_test)
+
+
+print(accuracy, '\n' , r2_score(y_test, predictions))
 
 
 #print(model.predict([[0, 1, 1]]))

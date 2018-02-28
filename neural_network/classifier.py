@@ -21,7 +21,7 @@ y = data['electricity_cooking']
 y=y.astype('int')
 
 
-X_train, X_test, y_train, y_test = train_test_split(X, y)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
 scaler = StandardScaler()
 # Fit only to the training data
