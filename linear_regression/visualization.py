@@ -45,7 +45,20 @@ def scatter_plots(data):
 
     plt.show()
 
-scatter_plots(data)
 
 
+data = data.iloc[:, [13, [25:35]]]
+correlations = data.corr()
+fig = plt.figure()
+ax = fig.add_subplot(111)
+cax = ax.matshow(correlations, vmin=1, vmax=1)
+fig.colorbar(cax)
+ticks = np.arange(0,9,1)
+ax.set_xticks(ticks)
+ax.set_yticks(ticks)
+ax.set_xticklabels(data.columns)
+ax.set_yticklabels(data.columns)
+
+#data.hist()
+plt.show()
 

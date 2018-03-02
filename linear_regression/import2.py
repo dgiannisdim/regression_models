@@ -15,6 +15,8 @@ data = data[data.electricity_total != 0]
 data = data.sort_values(by=['household_id', 'month'])
 data = data.reset_index(drop=True)
 
+
+
 #data = pd.get_dummies(data)
 
 

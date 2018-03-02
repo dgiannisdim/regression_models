@@ -100,8 +100,8 @@ del features[0]
 
 '''
 #create dataframe with installation columns
-e = pd.DataFrame(np.nan, index=range(0, len(data2.index)), columns=data)
-for f in data:
+e = pd.DataFrame(np.nan, index=range(0, len(data2.index)), columns=features)
+for f in features:
     for i in range(0, len(data2.index)):
         for j in range(0,len(data.index)):
             if data2['household_id'][i] == data['household_id'][j]:
@@ -110,9 +110,9 @@ for f in data:
 
 
 #merge dataframes into a final
-data2[data] = e
+data2[features] = e
 print(data2)
-data2.to_csv('final_values.csv')
+data2.to_csv('final_temp.csv')
 
 '''
 
