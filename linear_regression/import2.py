@@ -11,7 +11,6 @@ pd.set_option('display.max_row', 999)
 data = pd.read_csv(r'C:\regression_models\linear_regression/final_values.csv')
 del data['Unnamed: 0']
 data = data.dropna()
-data = data[data.electricity_total != 0]
 data = data.sort_values(by=['household_id', 'month'])
 data = data.reset_index(drop=True)
 
@@ -27,10 +26,8 @@ def analyze_values(data):
 
     for f in features:
         print(data[f].value_counts())
-        if len(data[f].value_counts()) == 1:
-            data = data.drop(f, axis=1)    #drop columns with only 1 category
 
-    return data
+analyze_values(data)
 
 
 #which categorical variables to use in model
@@ -44,10 +41,11 @@ def analyze_values_2(data):
 
 
 
+
 #outlier detection
 def find_outliers(x):
-    q1 = np.percentile(x, 10)
-    q3 = np.percentile(x, 90)
+    q1 = np.percentile(x, 5)
+    q3 = np.percentile(x, 95)
     iqr = q3 - q1
     floor = q1 - 1.5*iqr
     ceiling = q3 + 1.5*iqr
@@ -56,5 +54,37 @@ def find_outliers(x):
 
     return outlier_indicies, outlier_values
 
-lighting_indices, lighting_values = find_outliers(data['electricity_total'])
-print (np.sort(lighting_indices))
+
+consumptions = data.loc[:, 'electricity_always_on' : 'electricity_total']
+consumptions = list(consumptions.columns)
+
+for c in consumptions:
+    lighting_indices, lighting_values = find_outliers(data[c])
+    #print ('Outliers in ', c, ' : ' , np.sort(lighting_indices))
+
+
+
+#feature 'month' in the end of the dataset
+def reorder_features(data):
+    cols = data.columns.tolist()
+    cols = cols[2:]
+    data_temp = data[cols]
+    data_temp['month'] = data['month']
+    return data_temp
+
+data = reorder_features(data)
+
+
+#drop outliers and features with 0 values
+def drop_outliers(data):
+    data = data[(data.electricity_total < 2000) & (data.electricity_total != 0) & (data.electricity_other < 1000)]
+    data = data.drop(['swimming_pool', 'sauna', 'electricity_pool_or_sauna'], axis=1)
+    data = data.reset_index(drop=True)
+
+    return data
+
+data = drop_outliers(data)
+
+print(data.describe())
+#export final dataset to csv file
+#data.to_csv('final_dataset.csv')

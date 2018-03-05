@@ -13,11 +13,9 @@ pd.set_option('display.max_row', 999)
 data = pd.read_csv(r'C:\regression_models\linear_regression/final_values.csv')
 del data['Unnamed: 0']
 data = data.dropna()
-data = data[data.electricity_total != 0]
-data = data.drop(data.index[293])
-data = data.drop(data.index[433])
-data = data.sort_values(by=['household_id', 'month'])
-data = data.reset_index(drop=True)
+data = data.drop('electricity_pool_or_sauna', axis=1)
+
+
 
 
 
@@ -30,35 +28,39 @@ def plot_histogram(x):
 
 def scatter_plots(data):
     features = data.columns
-    x = features[14:]
-    y = features[2:14]
-    print(x, y)
-    print(len(y))
+    x = data['electricity_entertainment']
+    y = data.loc[:, 'dishwasher' : 'dvd_or_blueray']
+    print(y)
+    frames = [x, y]
+    c = pd.concat(frames, axis=1)
+    scatter_matrix(c)
 
-
-    plt.figure()
-    for i in range(1,10):
-        a = 331
-        plt.subplot(a)
-        for k in range(0, 2):
-            plt.scatter(data[x[0]], data[y[0]])
 
     plt.show()
 
 
 
-data = data.iloc[:, [13, [25:35]]]
-correlations = data.corr()
-fig = plt.figure()
-ax = fig.add_subplot(111)
-cax = ax.matshow(correlations, vmin=1, vmax=1)
-fig.colorbar(cax)
-ticks = np.arange(0,9,1)
-ax.set_xticks(ticks)
-ax.set_yticks(ticks)
-ax.set_xticklabels(data.columns)
-ax.set_yticklabels(data.columns)
 
-#data.hist()
-plt.show()
+def correlation_matrix(data):
+    data = data.iloc[:, 35:45]
+    correlations = data.corr()
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    cax = ax.matshow(correlations, vmin=1, vmax=1)
+    fig.colorbar(cax)
+    ticks = np.arange(0,9,1)
+    ax.set_xticks(ticks)
+    ax.set_yticks(ticks)
+    ax.set_xticklabels(data.columns)
+    ax.set_yticklabels(data.columns)
 
+    plt.show()
+
+
+def box_plots(data):
+    x = data.loc[:, 'electricity_always_on' : 'electricity_total']
+    x.plot(kind='box', subplots=True, layout=(4, 3), sharex=False, sharey=False)
+    plt.show()
+
+
+box_plots(data)
