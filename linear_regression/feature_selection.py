@@ -2,44 +2,97 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.feature_selection import RFE
-from sklearn.svm import SVC
-from sklearn.linear_model import LinearRegression
-from sklearn.feature_selection import SelectPercentile, SelectFromModel
+from sklearn.svm import SVC, SVR
+from sklearn.linear_model import LinearRegression, RandomizedLasso
+from sklearn.feature_selection import SelectPercentile, SelectFromModel, SelectKBest, \
+    f_regression, mutual_info_regression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.decomposition import PCA
-import sklearn.feature_selection
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
+
+
 
 
 pd.set_option('display.max_columns', 99)
 pd.set_option('display.max_row', 999)
 
-#data percentage
-data = pd.read_csv(r'C:\regression_models\linear_regression/final.csv')
-del data['Unnamed: 0']
-data = data.dropna()
+data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset.csv')
+#data= pd.get_dummies(data)
 
 
-#data raw values
-data = pd.read_csv(r'C:\regression_models\linear_regression/final_values.csv')
-del data['Unnamed: 0']
-data = data.dropna()
-data = data.reset_index(drop=True)
-data = pd.get_dummies(data)
-
-
-
-X = data.iloc[: , 14:]
-
+#split the dataset into training and testing set
+X = data.loc[: , 'fridge':]
 y = data['electricity_total']
 y=y.astype('int')
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1, test_size=0.3)
 
 
+
+#Select K-Best
+def kbest(X, y):
+    select = SelectKBest(k=10)
+    selected_features = select.fit(X, y)
+    indices_selected = selected_features.get_support(indices=True)
+    colnames_selected = [X.columns[i] for i in indices_selected]
+
+
+
+
+
+
+#Stability selection
+def lasso(X, y):
+    rlasso = RandomizedLasso(alpha=0.025)
+    rlasso.fit(X, y)
+
+    print(sorted(zip(map(lambda x: round(x, 4), rlasso.scores_),X.columns), reverse=True))
+
+
+
+
+#RFE with SVR estimator
+def rfe_selector_svr(X, y):
+    estimator = SVR(kernel='linear')
+    selector = RFE(estimator, 10, step=1)
+    selector = selector.fit(X, y)
+    indices_selected = selector.get_support(indices=True)
+    X = X.iloc[:, indices_selected]
+
+    return indices_selected
+
+print('SVR: ', rfe_selector_svr(X, y))
+
+
+
+#RFE with Linear Regression estimator
+def rfe_selector_lr(X, y):
+    estimator = LinearRegression()
+    selector = RFE(estimator, 10, step=1)
+    selector = selector.fit(X, y)
+    indices_selected = selector.get_support(indices=True)
+    X = X.iloc[:, indices_selected]
+
+    return indices_selected
+
+print('Linear Regresiion: ', rfe_selector_lr(X, y))
+
+#RFE with Random Forest estimator
+def rfe_selector_random_forest(X, y):
+    estimator = RandomForestRegressor()
+    selector = RFE(estimator, 10, step=1)
+    selector = selector.fit(X, y)
+    indices_selected = selector.get_support(indices=True)
+    X = X.iloc[:, indices_selected]
+
+    return indices_selected
+
+print('Random Forest: ', rfe_selector_random_forest(X, y))
+
+
+'''
 #feature selection
-select = SelectPercentile(percentile=50)
+select = SelectPercentile(percentile=25)
 select.fit(X_train, y_train)
 
 X_train_selected = select.transform(X_train)
@@ -48,19 +101,6 @@ X_test_selected = select.transform(X_test)
 
 
 
-#most important features
-select = sklearn.feature_selection.SelectKBest(k=20)
-selected_features = select.fit(X_train, y_train)
-indices_selected = selected_features.get_support(indices=True)
-colnames_selected = [X.columns[i] for i in indices_selected]
-
-X_train_selected = X_train[colnames_selected]
-X_test_selected = X_test[colnames_selected]
-
-
-
-
-'''
 
 #linear regression
 lm = LinearRegression()
@@ -88,7 +128,7 @@ print('Random forests before feature selection: ', r2_score(y_test, predictions)
 rf.fit(X_train_selected, y_train)
 predictions_selected = rf.predict(X_test_selected)
 print('Random forests after feature selection: ',r2_score(y_test, predictions_selected))
-'''
+
 
 
 #feature selection with Select From Model
@@ -119,4 +159,4 @@ def importance_plot(X, X_train, y_train):
     plt.yticks(range(len(indices)), features[indices])
     plt.show()
 
-importance_plot(X, X_train, y_train)
+'''

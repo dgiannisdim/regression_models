@@ -87,4 +87,4 @@ data = drop_outliers(data)
 
 print(data.describe())
 #export final dataset to csv file
-#data.to_csv('final_dataset.csv')
+data.to_csv('final_dataset.csv', index=False)

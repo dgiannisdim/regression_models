@@ -87,7 +87,7 @@ def merge_datasets(data):
     #merge dataframes into a final
     data2[features] = e
     print(data2)
-    data2.to_csv('final_temp.csv')
+    data2.to_csv('final_temp.csv', index=False)
 
 '''
 

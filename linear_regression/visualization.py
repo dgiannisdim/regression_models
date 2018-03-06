@@ -9,12 +9,7 @@ from sklearn import preprocessing
 pd.set_option('display.max_columns', 99)
 pd.set_option('display.max_row', 999)
 
-
-data = pd.read_csv(r'C:\regression_models\linear_regression/final_values.csv')
-del data['Unnamed: 0']
-data = data.dropna()
-data = data.drop('electricity_pool_or_sauna', axis=1)
-
+data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset.csv')
 
 
 
@@ -28,17 +23,16 @@ def plot_histogram(x):
 
 def scatter_plots(data):
     features = data.columns
-    x = data['electricity_entertainment']
-    y = data.loc[:, 'dishwasher' : 'dvd_or_blueray']
-    print(y)
-    frames = [x, y]
-    c = pd.concat(frames, axis=1)
-    scatter_matrix(c)
+    for f in features:
+        x = data[f]
+        y = data.loc[:, 'dishwasher' : 'digital_tv_box']
+        frames = [x, y]
+        c = pd.concat(frames, axis=1)
+        scatter_matrix(c)
 
+        plt.show()
 
-    plt.show()
-
-
+scatter_plots(data)
 
 
 def correlation_matrix(data):
@@ -63,4 +57,3 @@ def box_plots(data):
     plt.show()
 
 
-box_plots(data)
