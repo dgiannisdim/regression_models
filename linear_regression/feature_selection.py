@@ -28,7 +28,7 @@ y=y.astype('int')
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1, test_size=0.3)
 
 
-
+##Univariate Feature Selection
 #Select K-Best
 def kbest(X, y):
     select = SelectKBest(k=10)
@@ -36,7 +36,9 @@ def kbest(X, y):
     indices_selected = selected_features.get_support(indices=True)
     colnames_selected = [X.columns[i] for i in indices_selected]
 
+    return indices_selected
 
+print('K-best: ', kbest(X, y))
 
 
 
@@ -92,14 +94,6 @@ print('Random Forest: ', rfe_selector_random_forest(X, y))
 
 '''
 #feature selection
-select = SelectPercentile(percentile=25)
-select.fit(X_train, y_train)
-
-X_train_selected = select.transform(X_train)
-X_test_selected = select.transform(X_test)
-
-
-
 
 
 #linear regression

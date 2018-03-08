@@ -25,7 +25,7 @@ def scatter_plots(data):
     features = data.columns
     for f in features:
         x = data[f]
-        y = data.loc[:, 'dishwasher' : 'digital_tv_box']
+        y = data.loc[:, 'occupant_type' : 'water_heating']
         frames = [x, y]
         c = pd.concat(frames, axis=1)
         scatter_matrix(c)
