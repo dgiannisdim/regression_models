@@ -9,9 +9,9 @@ from sklearn import preprocessing
 pd.set_option('display.max_columns', 99)
 pd.set_option('display.max_row', 999)
 
-data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset.csv')
-
-
+data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged.csv')
+#data = pd.get_dummies(data)
+print(data.describe())
 
 
 def plot_histogram(x):
@@ -23,9 +23,10 @@ def plot_histogram(x):
 
 def scatter_plots(data):
     features = data.columns
+    features = features[: 11]
     for f in features:
         x = data[f]
-        y = data.loc[:, 'occupant_type' : 'water_heating']
+        y = data.loc[:, 'fridge' : 'grill']
         frames = [x, y]
         c = pd.concat(frames, axis=1)
         scatter_matrix(c)

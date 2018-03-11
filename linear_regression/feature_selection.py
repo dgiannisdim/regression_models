@@ -12,34 +12,31 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 
 
+#ignore some errors
+np.seterr(divide='ignore', invalid='ignore')
 
-
+#display settings in pandas
 pd.set_option('display.max_columns', 99)
 pd.set_option('display.max_row', 999)
 
-data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset.csv')
-#data= pd.get_dummies(data)
 
+#read csv files
+data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged.csv')
+data= pd.get_dummies(data, drop_first=True)
 
 #split the dataset into training and testing set
-X = data.loc[: , 'fridge':]
-y = data['electricity_total']
-y=y.astype('int')
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1, test_size=0.3)
+#X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1, test_size=0.25)
 
 
 ##Univariate Feature Selection
 #Select K-Best
 def kbest(X, y):
-    select = SelectKBest(k=10)
+    select = SelectKBest(k=30)
     selected_features = select.fit(X, y)
     indices_selected = selected_features.get_support(indices=True)
     colnames_selected = [X.columns[i] for i in indices_selected]
 
-    return indices_selected
-
-print('K-best: ', kbest(X, y))
-
+    return colnames_selected
 
 
 
@@ -56,40 +53,74 @@ def lasso(X, y):
 #RFE with SVR estimator
 def rfe_selector_svr(X, y):
     estimator = SVR(kernel='linear')
-    selector = RFE(estimator, 10, step=1)
+    selector = RFE(estimator, 30, step=1)
     selector = selector.fit(X, y)
     indices_selected = selector.get_support(indices=True)
-    X = X.iloc[:, indices_selected]
+    colnames_selected = [X.columns[i] for i in indices_selected]
 
-    return indices_selected
-
-print('SVR: ', rfe_selector_svr(X, y))
+    return colnames_selected
 
 
 
 #RFE with Linear Regression estimator
 def rfe_selector_lr(X, y):
     estimator = LinearRegression()
-    selector = RFE(estimator, 10, step=1)
+    selector = RFE(estimator, 30, step=1)
     selector = selector.fit(X, y)
     indices_selected = selector.get_support(indices=True)
-    X = X.iloc[:, indices_selected]
+    colnames_selected = [X.columns[i] for i in indices_selected]
 
-    return indices_selected
+    return colnames_selected
 
-print('Linear Regresiion: ', rfe_selector_lr(X, y))
+features = list(data.columns)
+features = features[: 11]
+selected_features = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
+
+for f in features:
+    #split dataset into independent and dependent variables
+    X = data.loc[: , 'property_size':]
+    y = data[f]
+    y=y.astype('int')
+    print(rfe_selector_lr(X, y))
 
 #RFE with Random Forest estimator
 def rfe_selector_random_forest(X, y):
     estimator = RandomForestRegressor()
-    selector = RFE(estimator, 10, step=1)
+    selector = RFE(estimator, 30, step=1)
     selector = selector.fit(X, y)
     indices_selected = selector.get_support(indices=True)
-    X = X.iloc[:, indices_selected]
+    colnames_selected = [X.columns[i] for i in indices_selected]
 
-    return indices_selected
+    return colnames_selected
 
-print('Random Forest: ', rfe_selector_random_forest(X, y))
+
+
+#loop for feature selection for every type of consumption
+features = list(data.columns)
+features = features[: 11]
+selected_features = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
+
+for f in features:
+    #split dataset into independent and dependent variables
+    X = data.loc[: , 'property_size':]
+    y = data[f]
+    y=y.astype('int')
+
+    #how many times a feature was chosen
+    list_of_all_indices = np.concatenate((kbest(X, y) , rfe_selector_svr(X, y),
+                            rfe_selector_lr(X, y), rfe_selector_random_forest(X, y)), axis=0)
+    list_of_all_indices = pd.Series(list_of_all_indices)
+
+    importand_features = list_of_all_indices.value_counts().index.tolist()
+
+    #create dataframe with most importand features of each consumption variable
+    selected_features[f] = importand_features[0:30]
+
+
+print(selected_features)
+#selected_features.to_csv('selected_features2.csv', index=False)
+
+
 
 
 '''

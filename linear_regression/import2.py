@@ -149,12 +149,24 @@ def change_to_ordinal(data):
     return data
 
 
+#change ordinal variables to categorical
+def change_to_categorical(data):
+    # change month
+    for i in data.index:
+        for j in range(0, 13):
+            if data['month'][i] == j:
+                data['month'][i] = str(j) + 'th'
+                break
 
-data = merge_characteristics(data)
-data = change_to_ordinal(data)
+    return data
+
+
+
+merge_characteristics(data)
+change_to_ordinal(data)
+change_to_categorical(data)
 analyze_values(data)
 
 
-
 #export final dataset to csv file
-#data.to_csv('final_dataset.csv', index=False)
+#data.to_csv('final_dataset_merged.csv', index=False)
