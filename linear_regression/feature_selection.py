@@ -62,6 +62,7 @@ def importance_df(X, y):
     return  top_features
 
 
+
 features = list(data.columns)
 features = features[: 10]
 selected_features_random_forest = pd.DataFrame(np.nan, index=range(0, 30), columns=features)

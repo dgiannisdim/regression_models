@@ -85,7 +85,6 @@ def drop_outliers(data):
 
 
 
-
 #merge installation charasteristics to 'electric' and 'non_electric'
 def merge_characteristics(data):
     features = ['water_heating', 'grill_heating', 'oven_heating']
