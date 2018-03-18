@@ -10,6 +10,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
+from sklearn import cross_validation
+from sklearn.ensemble import RandomForestRegressor
+
 
 
 #ignore some errors
@@ -27,6 +30,52 @@ data= pd.get_dummies(data, drop_first=True)
 #split the dataset into training and testing set
 #X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1, test_size=0.25)
 
+
+
+# importance of each feature
+def importance_plot(X, y):
+    forest = RandomForestRegressor(n_estimators=1000, random_state=0)
+    forest.fit(X, y)
+    features = X.columns
+
+    imporatnces = forest.feature_importances_
+    indices = np.argsort(imporatnces)
+
+    plt.barh(range(len(indices)), imporatnces[indices], color='b', align='center')
+    plt.yticks(range(len(indices)), features[indices])
+    plt.show()
+
+
+def importance_df(X, y):
+    forest = RandomForestRegressor(n_estimators=1000, random_state=0)
+    forest.fit(X, y)
+    features = X.columns
+
+    imporatnces = forest.feature_importances_
+    indices = np.argsort(imporatnces)
+
+    all_features = pd.DataFrame({'features': features, 'importances': imporatnces})
+    all_features = all_features.sort_values(by='importances', ascending=False)
+    all_features = all_features.reset_index(drop=True)
+    top_features = all_features.features[:30]
+
+    return  top_features
+
+
+features = list(data.columns)
+features = features[: 10]
+selected_features_random_forest = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
+
+for f in features:
+    #split dataset into independent and dependent variables
+    X = data.loc[: , 'property_size':]
+    y = data[f]
+    y=y.astype('int')
+
+    selected_features_random_forest[f] = importance_df(X, y)
+
+print(selected_features_random_forest)
+selected_features_random_forest.to_csv('selected_features_random_forest.csv', index=False)
 
 ##Univariate Feature Selection
 #Select K-Best
@@ -72,16 +121,8 @@ def rfe_selector_lr(X, y):
 
     return colnames_selected
 
-features = list(data.columns)
-features = features[: 11]
-selected_features = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
 
-for f in features:
-    #split dataset into independent and dependent variables
-    X = data.loc[: , 'property_size':]
-    y = data[f]
-    y=y.astype('int')
-    print(rfe_selector_lr(X, y))
+
 
 #RFE with Random Forest estimator
 def rfe_selector_random_forest(X, y):
@@ -97,8 +138,8 @@ def rfe_selector_random_forest(X, y):
 
 #loop for feature selection for every type of consumption
 features = list(data.columns)
-features = features[: 11]
-selected_features = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
+features = features[: 10]
+selected_features_rfe = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
 
 for f in features:
     #split dataset into independent and dependent variables
@@ -114,46 +155,16 @@ for f in features:
     importand_features = list_of_all_indices.value_counts().index.tolist()
 
     #create dataframe with most importand features of each consumption variable
-    selected_features[f] = importand_features[0:30]
+    selected_features_rfe[f] = importand_features[0:30]
 
 
-print(selected_features)
-#selected_features.to_csv('selected_features2.csv', index=False)
+
+#selected_features.to_csv('selected_features_rfe.csv', index=False)
 
 
 
 
 '''
-#feature selection
-
-
-#linear regression
-lm = LinearRegression()
-lm.fit(X_train, y_train)
-predictions = lm.predict(X_test)
-print('Linear regression before feature selection: ', r2_score(y_test, predictions))
-
-
-
-lm.fit(X_train_selected, y_train)
-predictions_selected = lm.predict(X_test_selected)
-print('Linear regression after feature selection: ',r2_score(y_test, predictions_selected))
-
-
-
-
-#random forests
-rf = RandomForestRegressor(n_estimators = 1000, random_state = 42)
-rf.fit(X_train, y_train);
-
-predictions = rf.predict(X_test)
-print('Random forests before feature selection: ', r2_score(y_test, predictions))
-
-
-rf.fit(X_train_selected, y_train)
-predictions_selected = rf.predict(X_test_selected)
-print('Random forests after feature selection: ',r2_score(y_test, predictions_selected))
-
 
 
 #feature selection with Select From Model
@@ -168,20 +179,5 @@ print(score)
 score_s = LinearRegression().fit(X_train_s, y_train).score(X_test_s, y_test)
 print(score_s)
 
-
-#importance of each feature
-def importance_plot(X, X_train, y_train):
-    forest = RandomForestClassifier(n_estimators=1000, random_state=0)
-    forest.fit(X_train, y_train)
-    features = X.columns
-    for name, importance in zip(features, forest.feature_importances_):
-        print(name, "=", importance)
-
-    imporatnces = forest.feature_importances_
-    indices = np.argsort(imporatnces)
-
-    plt.barh(range(len(indices)), imporatnces[indices], color='b', align='center')
-    plt.yticks(range(len(indices)), features[indices])
-    plt.show()
-
 '''
+

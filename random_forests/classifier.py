@@ -12,12 +12,12 @@ pd.set_option('display.max_row', 999)
 
 data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged.csv')
 selected_features = pd.read_csv(r'C:\regression_models\linear_regression/selected_features2.csv')
+selected_features_random_forest = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_random_forest.csv')
 
 
 data = pd.get_dummies(data, drop_first=True)
-consumption_features = list(data.columns)
-consumption_features = consumption_features[: 11]
-for cf in consumption_features:
+
+for cf in selected_features_random_forest.columns:
     consumption_selected = list(selected_features.loc[:, cf])
 
     X = data.loc[:, consumption_selected]
