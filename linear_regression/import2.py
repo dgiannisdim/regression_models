@@ -137,7 +137,6 @@ def change_to_ordinal(data):
 
 
 
-
 #change ordinal variables to categorical
 def change_to_categorical(data):
     # change month
@@ -152,6 +151,8 @@ def change_to_categorical(data):
 
 
 
+
+
 #analyze_data(data)
 
 merge_characteristics(data)
@@ -161,5 +162,21 @@ change_to_categorical(data)
 
 
 
+#transform consumption to %
+features = list(data.columns)
+features = features[:10]
+base = 'electricity_total'
+
+def transfotm_to_percentage(data, features, base):
+    for f in features:
+        data[f] = (data[f]/data[base])*100
+    data = data.dropna()
+    return data
+
+data2 = transfotm_to_percentage(data, features, base)
+
+
+
 #export final dataset to csv file
 #data.to_csv('final_dataset_merged.csv', index=False)
+#data2.to_csv('final_dataset_merged_percentage.csv', index=False)

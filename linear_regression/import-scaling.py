@@ -49,16 +49,7 @@ data = del_useless_features(data,columns)
 data2 = del_useless_features(data2,columns2)
 
 
-#transform consumption to %
-features2 = list(data2.columns.values)
-del features2[0:2]
 
-
-def transfotm_to_percentage(data, features, base):
-    for f in features:
-        data[f] = (data[f]/data[base])*100
-    data = data.dropna()
-    return data
 
 
 

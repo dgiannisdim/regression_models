@@ -25,7 +25,9 @@ pd.set_option('display.max_row', 999)
 
 #read csv files
 data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged.csv')
-data= pd.get_dummies(data, drop_first=True)
+data_percentage = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage.csv')
+data = pd.get_dummies(data, drop_first=True)
+data_percentage = pd.get_dummies(data, drop_first=True)
 
 #split the dataset into training and testing set
 #X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1, test_size=0.25)
@@ -62,21 +64,6 @@ def importance_df(X, y):
     return  top_features
 
 
-
-features = list(data.columns)
-features = features[: 10]
-selected_features_random_forest = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
-
-for f in features:
-    #split dataset into independent and dependent variables
-    X = data.loc[: , 'property_size':]
-    y = data[f]
-    y=y.astype('int')
-
-    selected_features_random_forest[f] = importance_df(X, y)
-
-print(selected_features_random_forest)
-selected_features_random_forest.to_csv('selected_features_random_forest.csv', index=False)
 
 ##Univariate Feature Selection
 #Select K-Best
@@ -136,34 +123,46 @@ def rfe_selector_random_forest(X, y):
     return colnames_selected
 
 
+#select features with different methods and write to csv
+def select_features(data):
+    features = list(data.columns)
+    features = features[: 10]
 
-#loop for feature selection for every type of consumption
-features = list(data.columns)
-features = features[: 10]
-selected_features_rfe = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
+    #create dataframe with most importand features for every consumption based only on random forests
+    selected_features_random_forest = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
 
-for f in features:
-    #split dataset into independent and dependent variables
-    X = data.loc[: , 'property_size':]
-    y = data[f]
-    y=y.astype('int')
+    #create dataframe with most importand features for every consumption based on rfe methods
+    selected_features_rfe = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
 
-    #how many times a feature was chosen
-    list_of_all_indices = np.concatenate((kbest(X, y) , rfe_selector_svr(X, y),
-                            rfe_selector_lr(X, y), rfe_selector_random_forest(X, y)), axis=0)
-    list_of_all_indices = pd.Series(list_of_all_indices)
+    for f in features:
+        # split dataset into independent and dependent variables
+        X = data.loc[:, 'property_size':]
+        y = data[f]
+        y = y.astype('int')
 
-    importand_features = list_of_all_indices.value_counts().index.tolist()
-
-    #create dataframe with most importand features of each consumption variable
-    selected_features_rfe[f] = importand_features[0:30]
+        #random forest dataframe
+        selected_features_random_forest[f] = importance_df(X, y)
 
 
+        #rfe dataframe
+        # how many times a feature was chosen
+        list_of_all_indices = np.concatenate((kbest(X, y), rfe_selector_svr(X, y),
+                                              rfe_selector_lr(X, y), rfe_selector_random_forest(X, y)), axis=0)
+        list_of_all_indices = pd.Series(list_of_all_indices)
 
-#selected_features.to_csv('selected_features_rfe.csv', index=False)
+        importand_features = list_of_all_indices.value_counts().index.tolist()
+
+        # create dataframe with most importand features of each consumption variable
+        selected_features_rfe[f] = importand_features[0:30]
 
 
 
+    #selected_features_random_forest.to_csv('selected_features_random_forest_percentage.csv', index=False)
+
+
+    #selected_features_rfe.to_csv('selected_features_rfe.csv', index=False)
+
+select_features(data)
 
 '''
 
