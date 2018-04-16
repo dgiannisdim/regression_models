@@ -3,7 +3,6 @@ import numpy as np
 
 
 
-
 pd.set_option('display.max_columns', 99)
 pd.set_option('display.max_row', 999)
 
@@ -85,8 +84,10 @@ def drop_outliers(data):
 
 
 
-#merge installation charasteristics to 'electric' and 'non_electric'
+
+#merge installation charasteristics to 'electric' and 'other'
 def merge_characteristics(data):
+    #merge water_heating, grill_heating and oven_heating
     features = ['water_heating', 'grill_heating', 'oven_heating']
 
     for i in data.index:

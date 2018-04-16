@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.feature_selection import RFE
-from sklearn.svm import SVC, SVR
+from sklearn.svm import SVC, SVR, LinearSVC
 from sklearn.linear_model import LinearRegression, RandomizedLasso
 from sklearn.feature_selection import SelectPercentile, SelectFromModel, SelectKBest, \
     f_regression, mutual_info_regression
@@ -12,6 +12,8 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn import cross_validation
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.decomposition import PCA
+from sklearn.ensemble import ExtraTreesClassifier
 
 
 
@@ -29,13 +31,14 @@ data_percentage = pd.read_csv(r'C:\regression_models\linear_regression/final_dat
 data = pd.get_dummies(data, drop_first=True)
 data_percentage = pd.get_dummies(data, drop_first=True)
 
+
 #split the dataset into training and testing set
 #X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1, test_size=0.25)
 
 
 
 # importance of each feature
-def importance_plot(X, y):
+def importance_plot(X, y, title):
     forest = RandomForestRegressor(n_estimators=1000, random_state=0)
     forest.fit(X, y)
     features = X.columns
@@ -45,9 +48,12 @@ def importance_plot(X, y):
 
     plt.barh(range(len(indices)), imporatnces[indices], color='b', align='center')
     plt.yticks(range(len(indices)), features[indices])
+    plt.title(title)
     plt.show()
 
 
+
+#feature selection with random forest
 def importance_df(X, y):
     forest = RandomForestRegressor(n_estimators=1000, random_state=0)
     forest.fit(X, y)
@@ -68,22 +74,46 @@ def importance_df(X, y):
 ##Univariate Feature Selection
 #Select K-Best
 def kbest(X, y):
-    select = SelectKBest(k=30)
-    selected_features = select.fit(X, y)
-    indices_selected = selected_features.get_support(indices=True)
+    model = SelectKBest(k=30)
+    selector = model.fit(X, y)
+    indices_selected = selector.get_support(indices=True)
     colnames_selected = [X.columns[i] for i in indices_selected]
 
     return colnames_selected
+
+
+#can not run code if f_regression is on
+def f_regression(X, y):
+
+    model = SelectKBest(f_regression(X, y), k=30)
+    selector = model.fit(X, y)
+
+    print(selector.get_support(indices=True))
 
 
 
 #Stability selection
 def lasso(X, y):
     rlasso = RandomizedLasso(alpha=0.025)
-    rlasso.fit(X, y)
+    selector = rlasso.fit(X, y)
 
-    print(sorted(zip(map(lambda x: round(x, 4), rlasso.scores_),X.columns), reverse=True))
+    indices_selected = selector.get_support(indices=True)
+    colnames_selected = [X.columns[i] for i in indices_selected]
 
+    return colnames_selected
+
+
+def select_from_model_extra_trees(X, y):
+    clf = ExtraTreesClassifier()
+    clf = clf.fit(X, y)
+
+    model = SelectFromModel(clf, threshold=0.001)
+    selector = model.fit(X, y)
+
+    indices_selected = selector.get_support(indices=True)
+    colnames_selected = [X.columns[i] for i in indices_selected]
+
+    return colnames_selected
 
 
 
@@ -123,9 +153,12 @@ def rfe_selector_random_forest(X, y):
     return colnames_selected
 
 
+
+
+
 #select features with different methods and write to csv
 def select_features(data):
-    features = list(data.columns)
+    features = data.columns
     features = features[: 10]
 
     #create dataframe with most importand features for every consumption based only on random forests
@@ -143,41 +176,37 @@ def select_features(data):
         #random forest dataframe
         selected_features_random_forest[f] = importance_df(X, y)
 
+        #importance_plot(X, y, f)
 
-        #rfe dataframe
+
+        ## rfe dataframe
         # how many times a feature was chosen
         list_of_all_indices = np.concatenate((kbest(X, y), rfe_selector_svr(X, y),
-                                              rfe_selector_lr(X, y), rfe_selector_random_forest(X, y)), axis=0)
+                                              rfe_selector_lr(X, y),
+                                              rfe_selector_random_forest(X, y),
+                                              lasso(X, y),
+                                              select_from_model_extra_trees(X, y)),
+                                              axis=0)
         list_of_all_indices = pd.Series(list_of_all_indices)
 
+
         importand_features = list_of_all_indices.value_counts().index.tolist()
+
 
         # create dataframe with most importand features of each consumption variable
         selected_features_rfe[f] = importand_features[0:30]
 
 
 
-    #selected_features_random_forest.to_csv('selected_features_random_forest_percentage.csv', index=False)
+    selected_features_random_forest.to_csv('selected_features_random_forest_percentage.csv', index=False)
 
 
-    #selected_features_rfe.to_csv('selected_features_rfe.csv', index=False)
+    selected_features_rfe.to_csv('selected_features_rfe_percentage.csv', index=False)
 
-select_features(data)
-
-'''
+    return selected_features_rfe
 
 
-#feature selection with Select From Model
-select = SelectFromModel(RandomForestClassifier(n_estimators=1000, random_state=42), threshold='median')
-select.fit(X_train, y_train)
-X_train_s = select.transform(X_train)
+select_features(data_percentage)
+#df.to_excel('selected_features_percentage.xlsx', index=False)
 
-
-X_test_s = select.transform(X_test)
-score = LinearRegression().fit(X_train, y_train).score(X_test, y_test)
-print(score)
-score_s = LinearRegression().fit(X_train_s, y_train).score(X_test_s, y_test)
-print(score_s)
-
-'''
 

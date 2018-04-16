@@ -59,10 +59,10 @@ data2 = data2.reset_index(drop=True)
 
 
 
-'''
+
 #merge Installation and Disaggregation to one dataset
 def merge_datasets(data):
-    features = list(data.columns.values)
+    features = list(data.columns)
     del features[0]
     
     e = pd.DataFrame(np.nan, index=range(0, len(data2.index)), columns=features)
@@ -80,5 +80,4 @@ def merge_datasets(data):
     print(data2)
     data2.to_csv('final_temp.csv', index=False)
 
-'''
 

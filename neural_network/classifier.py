@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPClassifier
+from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import r2_score
 from sklearn.preprocessing import StandardScaler
 from sklearn import cross_validation
@@ -34,17 +34,12 @@ def neural_eval(data, selected_features):
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.25)
 
         scaler = StandardScaler()
-        # Fit only to the training data
         scaler.fit(X_train)
-        scaler.fit(y_train)
-        # Now apply the transformations to the data:
         X_train = scaler.transform(X_train)
         X_test = scaler.transform(X_test)
-        y_train = scaler.transform(y_train)
-        y_test = scaler.transform(y_test)
 
 
-        mlp = MLPClassifier(hidden_layer_sizes=(80, 80, 80))
+        mlp = MLPRegressor(hidden_layer_sizes=(50, 50, 50), alpha=0.001, learning_rate_init=0.005)
         mlp.fit(X_train, y_train)
 
         predictions = mlp.predict(X_test)
