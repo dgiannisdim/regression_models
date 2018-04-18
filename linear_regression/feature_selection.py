@@ -32,10 +32,6 @@ data = pd.get_dummies(data, drop_first=True)
 data_percentage = pd.get_dummies(data, drop_first=True)
 
 
-#split the dataset into training and testing set
-#X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1, test_size=0.25)
-
-
 
 # importance of each feature
 def importance_plot(X, y, title):

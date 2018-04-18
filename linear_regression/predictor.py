@@ -27,32 +27,33 @@ selected_features_random_forest_percentage = pd.read_csv(r'C:\regression_models\
 
 
 #predict total electreicity raw values and use percentage models for the rest
-def stats_lr_pred(data, data_percentage, selected_features, selected_features_percentage):
+def predictor(data, data_percentage, selected_features, selected_features_percentage):
     data = pd.get_dummies(data, drop_first=True)
     data_percentage = pd.get_dummies(data_percentage, drop_first=True)
 
     consumption_selected = list(selected_features.loc[:, 'electricity_total'])
 
-
-    X_electricity_total = data.loc[:, consumption_selected]
-    #X = sm.add_constant(X)
-    y_electricity_total = data['electricity_total']
-
     # load the electricity_total model from disk
-    path = r'C:\regression_models\random_forests'
+    path = r'C:\regression_models\random_forests\models'
     model_name = path + '/electricity_total_model.pkl'
     model_pkl = open(model_name, 'rb')
     pickle_electricity_total_model = pickle.load(model_pkl)
 
 
     #prediction examples
-    row = 285
+    row = 282
     features_electricity_total = [data[f][row] for f in consumption_selected]
     features_electricity_total = np.reshape(features_electricity_total, (1, -1))
     electricity_total_prediction = pickle_electricity_total_model.predict(features_electricity_total)
     print('electricity_real: ', data.loc[row, 'electricity_total'])
     print('electricity_prediction: ', electricity_total_prediction)
     print('\n')
+
+
+    percentage_column = []
+    raw_column = []
+    percentage_pred_column = []
+    raw_pred_column = []
 
     for cf in selected_features_percentage.columns:
         consumption_selected_percentage = list(selected_features_percentage.loc[:, cf])
@@ -64,26 +65,33 @@ def stats_lr_pred(data, data_percentage, selected_features, selected_features_pe
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.25)
 
         # load the electricity_total model from disk
-        path = r'C:\regression_models\random_forests'
+        path = r'C:\regression_models\random_forests\models'
         model_name = path + '/' + cf + '_percentage_model.pkl'
         model_pkl = open(model_name, 'rb')
         pickle_model = pickle.load(model_pkl)
 
 
-        #prediction examples
+        #create columns with real and prediction values prediction examples
         features = [data_percentage[f][row] for f in consumption_selected_percentage]
         features = np.reshape(features, (1, -1))
-        print(cf + '_percentage: ')
-        print('real: ',data_percentage.loc[row, cf])
-        print('prediction: ',  pickle_model.predict(features), '\n')
+        prediction =  pickle_model.predict(features)
+
+        percentage_column.append(data_percentage.loc[row, cf])
+        percentage_pred_column.append(prediction)
+        raw_column.append(data.loc[row, cf])
+        raw_pred_column.append(prediction*0.01*electricity_total_prediction)
+
+    #create dataframe with real and prediction values
+    df = pd.DataFrame({'consumption' : selected_features.columns,
+                       'percentage' : percentage_column,
+                       'percentage_pred' : percentage_pred_column,
+                       'raw' : raw_column,
+                       'raw_pred' : raw_pred_column},
+                      columns= ['consumption', 'percentage', 'percentage_pred', 'raw', 'raw_pred'])
+
+    return df
 
 
-        #turn percentage consumption to raw values
-        print(cf, 'raw consumption: ', data.loc[row, cf])
-        print(cf, 'raw consumption prediction: ', pickle_model.predict(features)*0.01*electricity_total_prediction)
-        print(cf, 'r2: ', pickle_model.score(X_train, y_train))
-        print('\n')
+print(predictor(data, data_percentage, selected_features_rfe, selected_features_rfe_percentage))
 
-
-
-stats_lr_pred(data, data_percentage, selected_features_rfe, selected_features_rfe_percentage)
+predictor(data, data_percentage, selected_features_rfe, selected_features_rfe_percentage).to_excel('test.xlsx', index=False)

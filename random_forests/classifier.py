@@ -34,11 +34,8 @@ def random_forest_eval(data, selected_features):
     for cf in selected_features_rfe.columns:
         consumption_selected = list(selected_features.loc[:, cf])
 
-
         X = data.loc[:, consumption_selected]
-
         y = data[cf]
-
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.25)
 
         clf = RandomForestRegressor(n_estimators = 1000, random_state = 0)
@@ -49,28 +46,23 @@ def random_forest_eval(data, selected_features):
         #save the model
         switch = False
         if switch:
-            model_name = cf + '_model.pkl'
+            model_name = cf + '_percentage_model.pkl'
             model_pkl = open(model_name, 'wb')
             pickle.dump(clf, model_pkl)
 
 
-        '''
-        row = 520
-        # prediction examples
-        b = [data[f][row] for f in consumption_selected]
-        b= np.reshape(b, (1,-1))
-        print('prediction: ',   clf.predict(b) , 'real: ',  data.loc[row, cf])
-        '''
+        #calculate r2
+        r2 = r2_score(y_test, predictions)
 
         # calculate adjusted r2
-        rsquared_adj = 1 - (1 - clf.score(X_train, y_train)) * (len(y_train) - 1) / (
-                    len(y_train) - X_train.shape[1] - 1)
+        rsquared_adj = 1 - (1 - r2) * (len(y_test) - 1) / (
+                    len(y_test) - X_test .shape[1] - 1)
 
-        # calculate sMAPE
+        # calculate SMAPE
         smape = np.mean(200 * abs(y_test - predictions) / (abs(y_test) + abs(predictions)))
 
         # create columns to make dataframe with metrics for evaluation
-        r_squared_column.append(clf.score(X_train, y_train))
+        r_squared_column.append(r2)
         r_squared_adjusted_column.append(rsquared_adj)
         explained_variance_column.append(explained_variance_score(y_test, predictions))
         root_mean_square_error_column.append(np.sqrt(mean_squared_error(y_test, predictions)))
@@ -89,7 +81,8 @@ def random_forest_eval(data, selected_features):
 
 
 #random_forest_eval(data_percentage, selected_features_rfe_percentage)
-print(random_forest_eval(data, selected_features_rfe))
+print(random_forest_eval(data_percentage, selected_features_rfe_percentage))
+#print(random_forest_eval(data, selected_features_rfe))
 
 #random_forest_eval(data, selected_features_rfe).to_excel('random_forest_eval_results.xlsx', index=False)
 #random_forest_eval(data_percentage, selected_features_rfe_percentage).to_excel('random_forest_eval_percentage_results.xlsx', index=False)

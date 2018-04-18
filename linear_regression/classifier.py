@@ -217,7 +217,6 @@ def stats_lr_eval(data, selected_features):
     for cf in selected_features.columns:
         consumption_selected = list(selected_features.loc[:, cf])
 
-        consumption_selected = consumption_selected[: 25]
 
         X = data.loc[:, consumption_selected]
         #X = preprocessing.StandardScaler().fit_transform(X)
@@ -232,12 +231,6 @@ def stats_lr_eval(data, selected_features):
         res = clf.fit()
         predictions = res.predict(X_test)
 
-        row = 52
-        #prediction examples
-        #b = [data[f][row] for f in consumption_selected]
-        #print(res.predict(b) , data.loc[row, cf])
-
-
 
         r_squared_column.append(res.rsquared)
         r_squared_adjusted_column.append(res.rsquared_adj)
@@ -250,7 +243,8 @@ def stats_lr_eval(data, selected_features):
 
 
 
-    df = pd.DataFrame({'consumption' : selected_features.columns, 'r_squared' : r_squared_column,
+    df = pd.DataFrame({'consumption' : selected_features.columns,
+                       'r_squared' : r_squared_column,
                        'adjusted_r_squared' : r_squared_adjusted_column,
                        'smape' : smape_column,
                        'root_mean_squared_error' : root_mean_square_error_column,
@@ -260,7 +254,7 @@ def stats_lr_eval(data, selected_features):
 
     return df
 
-#print(stats_lr_eval(data, selected_features_rfe))
+print(stats_lr_eval(data, selected_features_rfe))
 #stats_lr_eval(data, selected_features_rfe_percentage)
 
 

@@ -7,11 +7,33 @@ pd.set_option('display.max_columns', 99)
 pd.set_option('display.max_row', 999)
 
 
-data = pd.read_csv(r'C:\regression_models\linear_regression/final_values.csv')
-del data['Unnamed: 0']
-data = data.dropna()
-data = data.sort_values(by=['household_id', 'month'])
-data = data.reset_index(drop=True)
+data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset.csv')
+data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_new.csv')
+
+
+
+#sort (by id and month) and drop NaN values
+def sort_and_drop(data, id):
+    data = data.dropna()
+    data = data.sort_values(by=[id, 'month'])
+    data = data.reset_index(drop=True)
+
+    return data
+
+
+data = sort_and_drop(data, 'household_id')
+data_new = sort_and_drop(data_new, 'eui64')
+
+
+#number of non zero values from each category
+def check_for_non_zeros(data):
+    print('number of rows: ' + str(len(data)))
+    print('number of non zero per category: ')
+    print((data != 0).sum(axis=0))
+    print('\n')
+
+check_for_non_zeros(data)
+check_for_non_zeros(data_new)
 
 
 
@@ -27,8 +49,11 @@ def analyze_data(data):
         print(data[f].value_counts())
         #print(f, ': ', data[f].unique())
 
+    print('\n')
 
 
+analyze_data(data)
+analyze_data(data_new)
 
 #which categorical variables to use in model
 def analyze_data_2(data):
@@ -38,7 +63,6 @@ def analyze_data_2(data):
         if data[col_name].dtypes == 'object':
             unique_cat = len(data[col_name].unique())
             print("Feature '{col_name}' has {unique_cat} unique categories".format(col_name=col_name, unique_cat=unique_cat))
-
 
 
 
