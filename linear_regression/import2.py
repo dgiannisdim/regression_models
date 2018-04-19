@@ -10,19 +10,20 @@ pd.set_option('display.max_row', 999)
 data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset.csv')
 data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_new.csv')
 
-
-
+data_new = data_new[data_new.electricity_total != 0]
 #sort (by id and month) and drop NaN values
 def sort_and_drop(data, id):
     data = data.dropna()
     data = data.sort_values(by=[id, 'month'])
     data = data.reset_index(drop=True)
+    del data[id]
 
     return data
 
 
 data = sort_and_drop(data, 'household_id')
 data_new = sort_and_drop(data_new, 'eui64')
+
 
 
 #number of non zero values from each category
@@ -32,8 +33,8 @@ def check_for_non_zeros(data):
     print((data != 0).sum(axis=0))
     print('\n')
 
-check_for_non_zeros(data)
-check_for_non_zeros(data_new)
+#check_for_non_zeros(data)
+#check_for_non_zeros(data_new)
 
 
 
@@ -45,6 +46,7 @@ def analyze_data(data):
     data = data.loc[:, 'property_type':]
     features = data.columns
 
+    print('check values of each feature:')
     for f in features:
         print(data[f].value_counts())
         #print(f, ': ', data[f].unique())
@@ -52,8 +54,8 @@ def analyze_data(data):
     print('\n')
 
 
-analyze_data(data)
-analyze_data(data_new)
+#analyze_data(data)
+#analyze_data(data_new)
 
 #which categorical variables to use in model
 def analyze_data_2(data):
@@ -96,7 +98,6 @@ def reorder_features(data):
 
 data = reorder_features(data)
 
-
 #drop outliers and features with 0 values
 def drop_outliers(data):
     data = data[(data.electricity_total < 2000) & (data.electricity_total != 0) & (data.electricity_other < 1000)]
@@ -105,7 +106,6 @@ def drop_outliers(data):
     data = data.reset_index(drop=True)
 
     return data
-
 
 
 
@@ -180,15 +180,20 @@ def change_to_categorical(data):
 
 #analyze_data(data)
 
-merge_characteristics(data)
-data = drop_outliers(data)
-change_to_ordinal(data)
-change_to_categorical(data)
+#merge_characteristics(data)
+#data = drop_outliers(data)
+#change_to_ordinal(data)
+#change_to_categorical(data)
 
+merge_characteristics(data_new)
+change_to_ordinal(data_new)
+change_to_categorical(data_new)
+
+#analyze_data(data_new)
 
 
 #transform consumption to %
-features = list(data.columns)
+features = list(data_new.columns)
 features = features[:10]
 base = 'electricity_total'
 
@@ -199,9 +204,13 @@ def transfotm_to_percentage(data, features, base):
     return data
 
 data2 = transfotm_to_percentage(data, features, base)
+data2_new = transfotm_to_percentage(data_new, features, base)
 
 
 
 #export final dataset to csv file
 #data.to_csv('final_dataset_merged.csv', index=False)
 #data2.to_csv('final_dataset_merged_percentage.csv', index=False)
+
+#data_new.to_csv('final_dataset_merged_new.csv', index=False)
+#data2_new.to_csv('final_dataset_merged_percentage_new.csv', index=False)

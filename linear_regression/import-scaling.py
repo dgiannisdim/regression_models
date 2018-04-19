@@ -78,6 +78,7 @@ data2_new = data2_new.replace('"', '', regex=True)
 data2_new.columns = columns2_new
 
 
+
 def check_na_values(data):
     data = data.replace('', np.nan, regex=True)
     print(data.isnull().sum())
@@ -91,6 +92,8 @@ check_na_values(data2_new)
 
 data_new = data_new.drop_duplicates(subset=['eui64'], keep='first')
 data_new = data_new.reset_index(drop=True)
+data = data.drop_duplicates(subset=['household_id'], keep='first')
+data = data.reset_index(drop=True)
 
 
 #define useless data for each dataframe
@@ -100,58 +103,35 @@ data_new = del_useless_features(data_new,columns_to_drop)
 data2_new = del_useless_features(data2_new,columns_to_drop2)
 
 
-
-
-#merge Installation and Disaggregation to one dataset
-def merge_datasets(data, data2, id, name):
-    features = list(data.columns)
-    del features[0]
-    
-    e = pd.DataFrame(np.nan, index=range(0, len(data2.index)), columns=features)
-    
-    for f in features:
-        for i in range(0, len(data2.index)):
-            for j in range(0,len(data.index)):
-                if data2[id][i] == data[id][j]:
-                    e[f][i] = data[f][j]
-                    break
-    
-    
-    #merge dataframes into a final
-    data2[features] = e
-    print(data2)
-    data2.to_csv(name, index=False)
-    return e
-
-
-name = 'final_dataset_new.csv'
-id = 'eui64'
-#merge_datasets(data_new, data2_new, id, name)
-
-
-
-
-# merge Installation and Disaggregation to one dataset
-def merge_datasets2(data, data2, id, name):
+#merge installation and disaggregation datasets and write to csv
+def merge_datasets(data, data2, id):
     features = list(data.columns)
     del features[0]
 
     e = pd.DataFrame(np.nan, index=range(0, len(data2.index)), columns=features)
 
-    for f in features:
-        for i in range(0, len(data2.index)):
-            for j in range(0, len(data.index)):
-                if data2[id][i] == data[id][j]:
-                    e[f][i] = data[f][j]
-                    break
+    for i in range(0, len(data.index)):
+        for j in range(0, len(data2.index)):
+            if data[id][i] == data2[id][j]:
+                e.iloc[j] = data.iloc[i]
+
 
     # merge dataframes into a final
     data2[features] = e
-    print(data2)
-    data2.to_csv(name, index=False)
-    return e
+
+    return data2
 
 
+##write datasets to csv
+#old dataset
+name = 'final_dataset.csv'
+id = 'household_id'
+#merge_datasets(data, data2, id).to_csv(name, index=False)
+
+#new dataset
 name = 'final_dataset_new.csv'
 id = 'eui64'
-#merge_datasets2(data_new, data2_new, id, name)
+#merge_datasets(data_new, data2_new, id).to_csv(name, index=False)
+
+
+

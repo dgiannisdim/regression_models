@@ -28,10 +28,14 @@ pd.set_option('display.max_row', 999)
 #read csv files
 data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged.csv')
 data_percentage = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage.csv')
+data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_new.csv')
+data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage.csv')
 data = pd.get_dummies(data, drop_first=True)
-data_percentage = pd.get_dummies(data, drop_first=True)
+data_percentage = pd.get_dummies(data_percentage, drop_first=True)
+data_new = pd.get_dummies(data_new, drop_first=True)
+data_percentage_new = pd.get_dummies(data_percentage_new, drop_first=True)
 
-
+print(data_new.head())
 
 # importance of each feature
 def importance_plot(X, y, title):
