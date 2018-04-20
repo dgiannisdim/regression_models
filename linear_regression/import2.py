@@ -193,24 +193,24 @@ change_to_categorical(data_new)
 
 
 #transform consumption to %
-features = list(data_new.columns)
-features = features[:10]
-base = 'electricity_total'
-
 def transfotm_to_percentage(data, features, base):
     for f in features:
         data[f] = (data[f]/data[base])*100
     data = data.dropna()
     return data
 
-data2 = transfotm_to_percentage(data, features, base)
-data2_new = transfotm_to_percentage(data_new, features, base)
 
 
-
-#export final dataset to csv file
+##export final dataset to csv file
+base = 'electricity_total'
+#old dataset
+features = list(data_new.columns)
+features = features[:10]
 #data.to_csv('final_dataset_merged.csv', index=False)
-#data2.to_csv('final_dataset_merged_percentage.csv', index=False)
+#transfotm_to_percentage(data, features, base).to_csv('final_dataset_merged_percentage.csv', index=False)
 
+#new dataset
+features = list(data_new.columns)
+features = features[:12]
 #data_new.to_csv('final_dataset_merged_new.csv', index=False)
-#data2_new.to_csv('final_dataset_merged_percentage_new.csv', index=False)
+transfotm_to_percentage(data_new, features, base).to_csv('final_dataset_merged_percentage_new.csv', index=False)

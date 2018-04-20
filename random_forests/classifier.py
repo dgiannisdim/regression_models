@@ -20,7 +20,15 @@ selected_features_random_forest = pd.read_csv(r'C:\regression_models\linear_regr
 selected_features_rfe_percentage = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_percentage.csv')
 selected_features_random_forest_percentage = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_random_forest_percentage.csv')
 
+#import new datasets
+data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_new.csv')
+data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage_new.csv')
+selected_features_rfe_new = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_new.csv')
+#selected_features_rfe_percentage = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_percentage.csv')
 
+
+data_new.rename(columns={'dvd_or_bluray': 'dvd_or_blueray'}, inplace=True)
+data_percentage_new.rename(columns={'dvd_or_bluray': 'dvd_or_blueray'}, inplace=True)
 
 def random_forest_eval(data, selected_features):
     data = pd.get_dummies(data, drop_first=True)
@@ -81,7 +89,7 @@ def random_forest_eval(data, selected_features):
 
 
 #random_forest_eval(data_percentage, selected_features_rfe_percentage)
-print(random_forest_eval(data_percentage, selected_features_rfe_percentage))
+print(random_forest_eval(data_new, selected_features_rfe_new))
 #print(random_forest_eval(data, selected_features_rfe))
 
 #random_forest_eval(data, selected_features_rfe).to_excel('random_forest_eval_results.xlsx', index=False)

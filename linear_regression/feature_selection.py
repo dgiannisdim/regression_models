@@ -35,7 +35,7 @@ data_percentage = pd.get_dummies(data_percentage, drop_first=True)
 data_new = pd.get_dummies(data_new, drop_first=True)
 data_percentage_new = pd.get_dummies(data_percentage_new, drop_first=True)
 
-print(data_new.head())
+
 
 # importance of each feature
 def importance_plot(X, y, title):
@@ -159,7 +159,8 @@ def rfe_selector_random_forest(X, y):
 #select features with different methods and write to csv
 def select_features(data):
     features = data.columns
-    features = features[: 10]
+    features = features[: 12]
+    print(features)
 
     #create dataframe with most importand features for every consumption based only on random forests
     selected_features_random_forest = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
@@ -198,15 +199,16 @@ def select_features(data):
 
 
 
-    selected_features_random_forest.to_csv('selected_features_random_forest_percentage.csv', index=False)
-
-
-    selected_features_rfe.to_csv('selected_features_rfe_percentage.csv', index=False)
 
     return selected_features_rfe
 
 
-select_features(data_percentage)
+
+## write selected features to csv file
+#old dataset
+#select_features(data).to_csv('selected_features_rfe.csv', index=False)
+#new dataset
+#select_features(data_new).to_csv('selected_features_rfe_new.csv', index=False)
 #df.to_excel('selected_features_percentage.xlsx', index=False)
 
 

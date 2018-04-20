@@ -14,13 +14,23 @@ from sklearn import model_selection
 pd.set_option('display.max_columns', 99)
 pd.set_option('display.max_row', 999)
 
-
+#import old datasets
 data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged.csv')
 data_percentage = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage.csv')
 selected_features_rfe = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe.csv')
 selected_features_random_forest = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_random_forest.csv')
 selected_features_rfe_percentage = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_percentage.csv')
 selected_features_random_forest_percentage = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_random_forest_percentage.csv')
+
+#import new datasets
+data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_new.csv')
+data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage_new.csv')
+selected_features_rfe_new = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_new.csv')
+#selected_features_rfe_percentage = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_percentage.csv')
+
+data_new.rename(columns={'dvd_or_bluray': 'dvd_or_blueray'}, inplace=True)
+data_percentage_new.rename(columns={'dvd_or_bluray': 'dvd_or_blueray'}, inplace=True)
+selected_features_rfe_new = selected_features_rfe_new.replace({'dvd_or_bluray': 'dvd_or_blueray'})
 
 
 
@@ -255,6 +265,7 @@ def stats_lr_eval(data, selected_features):
     return df
 
 print(stats_lr_eval(data, selected_features_rfe))
+print(stats_lr_eval(data_percentage_new, selected_features_rfe_new))
 #stats_lr_eval(data, selected_features_rfe_percentage)
 
 
