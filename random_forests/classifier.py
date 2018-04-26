@@ -24,11 +24,10 @@ selected_features_random_forest_percentage = pd.read_csv(r'C:\regression_models\
 data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_new.csv')
 data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage_new.csv')
 selected_features_rfe_new = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_new.csv')
-#selected_features_rfe_percentage = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_percentage.csv')
+selected_features_rfe_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_percentage_new.csv')
 
 
-data_new.rename(columns={'dvd_or_bluray': 'dvd_or_blueray'}, inplace=True)
-data_percentage_new.rename(columns={'dvd_or_bluray': 'dvd_or_blueray'}, inplace=True)
+
 
 def random_forest_eval(data, selected_features):
     data = pd.get_dummies(data, drop_first=True)
@@ -54,7 +53,7 @@ def random_forest_eval(data, selected_features):
         #save the model
         switch = False
         if switch:
-            model_name = cf + '_percentage_model.pkl'
+            model_name = cf + '_percentage_model_random_forest.pkl'
             model_pkl = open(model_name, 'wb')
             pickle.dump(clf, model_pkl)
 

@@ -28,11 +28,11 @@ selected_features_random_forest_percentage = pd.read_csv(r'C:\regression_models\
 data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_new.csv')
 data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage_new.csv')
 selected_features_rfe_new = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_new.csv')
-#selected_features_rfe_percentage = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_percentage.csv')
+selected_features_rfe_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_percentage_new.csv')
 
+data_new = data_new.dropna()
+data_new = data_new.reset_index(drop=True)
 
-data_new.rename(columns={'dvd_or_bluray': 'dvd_or_blueray'}, inplace=True)
-data_percentage_new.rename(columns={'dvd_or_bluray': 'dvd_or_blueray'}, inplace=True)
 
 
 
@@ -41,23 +41,25 @@ def predictor(data, data_percentage, selected_features, selected_features_percen
     data = pd.get_dummies(data, drop_first=True)
     data_percentage = pd.get_dummies(data_percentage, drop_first=True)
 
+
     consumption_selected = list(selected_features.loc[:, 'electricity_total'])
 
 
     # load the electricity_total model from disk
-    path = r'C:\regression_models\random_forests\models'
-    model_name = path + '/electricity_total_model.pkl'
+    path = r'C:\regression_models\linear_regression\models'
+    model_name = path + '/electricity_total_model_stats_lr.pkl'
     model_pkl = open(model_name, 'rb')
     pickle_electricity_total_model = pickle.load(model_pkl)
 
 
+
     #prediction examples
-    row = 128
+    row = 534
     features_electricity_total = [data[f][row] for f in consumption_selected]
     features_electricity_total = np.reshape(features_electricity_total, (1, -1))
     electricity_total_prediction = pickle_electricity_total_model.predict(features_electricity_total)
-    print('electricity_real: ', data.loc[row, 'electricity_total'])
-    print('electricity_prediction: ', electricity_total_prediction)
+    print('electricity_total_real: ', data.loc[row, 'electricity_total'])
+    print('electricity_total_prediction: ', electricity_total_prediction)
     print('\n')
 
 
@@ -76,8 +78,8 @@ def predictor(data, data_percentage, selected_features, selected_features_percen
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.25)
 
         # load the electricity_total model from disk
-        path = r'C:\regression_models\random_forests\models'
-        model_name = path + '/' + cf + '_percentage_model.pkl'
+        path = r'C:\regression_models\linear_regression\models'
+        model_name = path + '/' + cf + '_percentage_model_stats_lr.pkl'
         model_pkl = open(model_name, 'rb')
         pickle_model = pickle.load(model_pkl)
 
@@ -103,6 +105,6 @@ def predictor(data, data_percentage, selected_features, selected_features_percen
     return df
 
 
-print(predictor(data_new, data_percentage_new, selected_features_rfe, selected_features_rfe))
+print(predictor(data, data_percentage, selected_features_rfe, selected_features_rfe_percentage))
 
 #predictor(data, data_percentage, selected_features_rfe, selected_features_rfe_percentage).to_excel('test.xlsx', index=False)

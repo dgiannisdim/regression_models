@@ -29,7 +29,22 @@ pd.set_option('display.max_row', 999)
 data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged.csv')
 data_percentage = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage.csv')
 data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_new.csv')
-data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage.csv')
+data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage_new.csv')
+
+
+#sort drop NaN values
+def sort_and_drop(data):
+    data = data.dropna()
+    data = data.reset_index(drop=True)
+
+    return data
+
+
+data = sort_and_drop(data)
+data_new = sort_and_drop(data_new)
+data_percentage = sort_and_drop(data_percentage)
+data_percentage_new = sort_and_drop(data_percentage_new)
+
 data = pd.get_dummies(data, drop_first=True)
 data_percentage = pd.get_dummies(data_percentage, drop_first=True)
 data_new = pd.get_dummies(data_new, drop_first=True)
@@ -150,6 +165,7 @@ def rfe_selector_random_forest(X, y):
     indices_selected = selector.get_support(indices=True)
     colnames_selected = [X.columns[i] for i in indices_selected]
 
+
     return colnames_selected
 
 
@@ -159,8 +175,9 @@ def rfe_selector_random_forest(X, y):
 #select features with different methods and write to csv
 def select_features(data):
     features = data.columns
-    features = features[: 12]
-    print(features)
+    features = features[: 10]
+
+
 
     #create dataframe with most importand features for every consumption based only on random forests
     selected_features_random_forest = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
@@ -175,7 +192,7 @@ def select_features(data):
         y = y.astype('int')
 
         #random forest dataframe
-        selected_features_random_forest[f] = importance_df(X, y)
+        #selected_features_random_forest[f] = importance_df(X, y)
 
         #importance_plot(X, y, f)
 
@@ -203,12 +220,74 @@ def select_features(data):
     return selected_features_rfe
 
 
+#print(select_features(data))
 
 ## write selected features to csv file
 #old dataset
 #select_features(data).to_csv('selected_features_rfe.csv', index=False)
+#select_features(data_percentage).to_csv('selected_features_rfe_percentage.csv', index=False)
+
+
+
+#select features with different methods and write to csv
+def select_features_new(data):
+
+
+    features = ['electricity_space_heating', 'electricity_water_heating',
+       'electricity_electric_vehicle', 'electricity_pool_or_sauna']
+
+    #create dataframe with most importand features for every consumption based on rfe methods
+    selected_features_rfe = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
+
+    for f in features:
+        # split dataset into independent and dependent variables
+        X = data.loc[:, 'property_size':]
+        y = data[f]
+        y = y.astype('int')
+
+
+        ## rfe dataframe
+        # how many times a feature was chosen
+        list_of_all_indices = np.concatenate((kbest(X, y), rfe_selector_svr(X, y),
+                                              rfe_selector_lr(X, y),
+                                              rfe_selector_random_forest(X, y),
+                                              lasso(X, y),
+                                              select_from_model_extra_trees(X, y)),
+                                              axis=0)
+        list_of_all_indices = pd.Series(list_of_all_indices)
+
+
+        importand_features = list_of_all_indices.value_counts().index.tolist()
+
+
+        # create dataframe with most importand features of each consumption variable
+        selected_features_rfe[f] = importand_features[0:30]
+
+        print('#################################################')
+        print('#################################################')
+        print('#################################################')
+        print('\n')
+        print('\n')
+
+
+
+
+    return selected_features_rfe
+
+
 #new dataset
-#select_features(data_new).to_csv('selected_features_rfe_new.csv', index=False)
+#select_features_new(data_new).to_csv('selected_features_rfe_new2.csv', index=False)
+#select_features_new(data_percentage_new).to_csv('selected_features_rfe_percentage_new2.csv', index=False)
 #df.to_excel('selected_features_percentage.xlsx', index=False)
 
 
+#pca
+X = data.loc[:, 'property_size':]
+y = data['electricity_total']
+y = y.astype('int')
+
+pca = PCA(n_components=20)
+pca.fit(X)
+print(pca.explained_variance_)
+plt.plot(np.cumsum(pca.explained_variance_ratio_))
+plt.show()

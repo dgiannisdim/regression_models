@@ -11,6 +11,8 @@ data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset.csv')
 data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_new.csv')
 
 data_new = data_new[data_new.electricity_total != 0]
+
+
 #sort (by id and month) and drop NaN values
 def sort_and_drop(data, id):
     data = data.dropna()
@@ -38,9 +40,6 @@ def check_for_non_zeros(data):
 
 
 
-#data = pd.get_dummies(data)
-
-
 #how many categories from each feature
 def analyze_data(data):
     data = data.loc[:, 'property_type':]
@@ -54,8 +53,11 @@ def analyze_data(data):
     print('\n')
 
 
+
 #analyze_data(data)
 #analyze_data(data_new)
+
+
 
 #which categorical variables to use in model
 def analyze_data_2(data):
@@ -81,12 +83,12 @@ def find_outliers(x):
     return outlier_indicies, outlier_values
 
 
-consumptions = data.loc[:, 'electricity_always_on' : 'electricity_total']
+consumptions = data_new.loc[:, 'electricity_always_on' : 'electricity_total']
 consumptions = list(consumptions.columns)
 
 for c in consumptions:
-    lighting_indices, lighting_values = find_outliers(data[c])
-    #print ('Outliers in ', c, ' : ' , np.sort(lighting_indices))
+    indices, values = find_outliers(data_new[c])
+    #print ('Outliers in ', c, ' : ' , np.sort(indices))
 
 
 
@@ -176,14 +178,13 @@ def change_to_categorical(data):
 
 
 
-
-
 #analyze_data(data)
 
 #merge_characteristics(data)
 #data = drop_outliers(data)
 #change_to_ordinal(data)
 #change_to_categorical(data)
+
 
 merge_characteristics(data_new)
 change_to_ordinal(data_new)
@@ -213,4 +214,5 @@ features = features[:10]
 features = list(data_new.columns)
 features = features[:12]
 #data_new.to_csv('final_dataset_merged_new.csv', index=False)
-transfotm_to_percentage(data_new, features, base).to_csv('final_dataset_merged_percentage_new.csv', index=False)
+#transfotm_to_percentage(data_new, features, base).to_csv('final_dataset_merged_percentage_new.csv', index=False)
+

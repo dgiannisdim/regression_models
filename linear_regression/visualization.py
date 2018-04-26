@@ -3,15 +3,62 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pandas.plotting import scatter_matrix
 from sklearn import preprocessing
+from string import ascii_letters
+import seaborn as sns
 
 
 
 pd.set_option('display.max_columns', 99)
 pd.set_option('display.max_row', 999)
 
+#read csv files
 data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged.csv')
-#data = pd.get_dummies(data)
-print(data.describe())
+data_percentage = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage.csv')
+data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_new.csv')
+data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage_new.csv')
+
+
+#sort drop NaN values
+def sort_and_drop(data):
+    data = data.dropna()
+    data = data.reset_index(drop=True)
+
+    return data
+
+
+data = sort_and_drop(data)
+data_new = sort_and_drop(data_new)
+data_percentage = sort_and_drop(data_percentage)
+data_percentage_new = sort_and_drop(data_percentage_new)
+
+
+
+
+#create correlation matrix
+def correlation_matrix(data):
+    corr = data.corr()
+
+    # Generate a mask for the upper triangle
+    mask = np.zeros_like(corr, dtype=np.bool)
+    mask[np.triu_indices_from(mask)] = True
+
+    # Set up the matplotlib figure
+    f, ax = plt.subplots(figsize=(11, 9))
+
+    # Generate a custom diverging colormap
+    cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+    # Draw the heatmap with the mask and correct aspect ratio
+    sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.3, center=0,
+                square=True, linewidths=.5, cbar_kws={"shrink": .5})
+
+    plt.title('Correlation matrix')
+    plt.savefig('Correlation matrix data percentage new')
+
+
+
+#correlation_matrix(data_percentage_new)
+
 
 
 def plot_histogram(x):
@@ -33,7 +80,7 @@ def scatter_plots(data):
 
         plt.show()
 
-scatter_plots(data)
+#scatter_plots(data)
 
 
 def correlation_matrix(data):

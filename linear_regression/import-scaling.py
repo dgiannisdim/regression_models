@@ -13,7 +13,6 @@ pd.set_option('display.max_columns', 50)
 pd.set_option('display.max_row', 9999)
 
 
-
 #explore dataset
 def explore(data):
     print('Head of the dataframe: ')
@@ -60,7 +59,7 @@ columns_new = ["eui64","property_type","property_size","property_age","property_
             "occupants","occupant_type","space_heating","water_heating","stove_heating",
             "grill_heating","oven_heating","photo_voltaic","fridge","freezer",
             "combi_fridge_freezer","oven","grill","hob","microwave","kettle","toaster",
-            "dishwasher","washing_machine","tumble_dryer","iron","tv","dvd_or_bluray",
+            "dishwasher","washing_machine","tumble_dryer","iron","tv","dvd_or_blueray",
             "digital_tv_box","games_console","computer","tablet","electric_shower",
             "ev_charger","swimming_pool","sauna","month","year"]
 
@@ -81,14 +80,13 @@ data2_new.columns = columns2_new
 
 def check_na_values(data):
     data = data.replace('', np.nan, regex=True)
-    print(data.isnull().sum())
 
-    data = data.dropna()
     return data
 
 
 data_new = check_na_values(data_new)
 check_na_values(data2_new)
+
 
 data_new = data_new.drop_duplicates(subset=['eui64'], keep='first')
 data_new = data_new.reset_index(drop=True)
@@ -102,6 +100,23 @@ columns_to_drop2 = ["gas_space_heating","gas_water_heating","gas_cooking","gas_t
 data_new = del_useless_features(data_new,columns_to_drop)
 data2_new = del_useless_features(data2_new,columns_to_drop2)
 
+
+#replace Nan values with most frequent of each category
+def replace_nan(data):
+    data = data.loc[:, 'property_type':]
+    features = data.columns
+    freq = []
+    for f in features:
+        freq.append(data[f].value_counts().index[0])
+
+    for i in range(0, len(data.index)):
+        if data_new.iloc[i].isnull().any():
+            data_new.iloc[i][features] = freq
+
+    return data_new
+
+
+data_new = replace_nan(data_new)
 
 #merge installation and disaggregation datasets and write to csv
 def merge_datasets(data, data2, id):

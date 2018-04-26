@@ -7,7 +7,7 @@ import statsmodels.api as sm
 from sklearn.svm import SVR
 import matplotlib.pyplot as plt
 from sklearn import model_selection
-
+import pickle
 
 
 
@@ -26,12 +26,15 @@ selected_features_random_forest_percentage = pd.read_csv(r'C:\regression_models\
 data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_new.csv')
 data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage_new.csv')
 selected_features_rfe_new = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_new.csv')
-#selected_features_rfe_percentage = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_percentage.csv')
+selected_features_rfe_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_percentage_new.csv')
 
-data_new.rename(columns={'dvd_or_bluray': 'dvd_or_blueray'}, inplace=True)
-data_percentage_new.rename(columns={'dvd_or_bluray': 'dvd_or_blueray'}, inplace=True)
-selected_features_rfe_new = selected_features_rfe_new.replace({'dvd_or_bluray': 'dvd_or_blueray'})
+selected_features_rfe_new2 = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_new2.csv')
 
+
+data = data.dropna()
+data_percentage = data_percentage.dropna()
+data_new = data_new.dropna()
+data_percentage_new = data_percentage_new.dropna()
 
 
 #create model with sklearn
@@ -248,9 +251,17 @@ def stats_lr_eval(data, selected_features):
         root_mean_square_error_column.append(np.sqrt(mean_squared_error(y_test, predictions)))
         smape_column.append(np.mean(200 * abs(y_test - predictions) / (abs(y_test) + abs(predictions))))
 
+
+
         #print(res.summary())
         #print(res.params)
 
+        # save the model
+        switch = False
+        if switch:
+            model_name = cf + '_percentage_model_stats_lr.pkl'
+            model_pkl = open(model_name, 'wb')
+            pickle.dump(res, model_pkl)
 
 
     df = pd.DataFrame({'consumption' : selected_features.columns,
@@ -264,10 +275,10 @@ def stats_lr_eval(data, selected_features):
 
     return df
 
-print(stats_lr_eval(data, selected_features_rfe))
-print(stats_lr_eval(data_percentage_new, selected_features_rfe_new))
-#stats_lr_eval(data, selected_features_rfe_percentage)
-
+print(stats_lr_eval(data_percentage, selected_features_rfe_percentage))
+#print(stats_lr_eval(data, selected_features_rfe))
+#print(stats_lr_eval(data_new, selected_features_rfe_new))
+#print(stats_lr_eval(data_percentage_new, selected_features_rfe_percentage_new))
 
 
 def gradient_boosting(data, selected_features):
