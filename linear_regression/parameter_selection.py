@@ -146,8 +146,6 @@ def SVR_parameters(data, selected_features):
     #plot_paramaeters()
 
 
-
-
 SVR_parameters(data, selected_features_rfe)
 
 
