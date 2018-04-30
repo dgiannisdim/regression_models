@@ -104,7 +104,8 @@ data = reorder_features(data)
 def drop_outliers(data):
     data = data[(data.electricity_total < 2000) & (data.electricity_total != 0) & (data.electricity_other < 1000)]
     data = data.drop(['swimming_pool', 'sauna', 'electricity_water_heating', 'water_heating', 'grill',
-                      'electricity_pool_or_sauna', 'space_heating', 'photo_voltaic', 'oven', 'hob'], axis=1)
+                      'electricity_pool_or_sauna', 'space_heating', 'photo_voltaic', 'oven', 'hob',
+                      'electricity_space_heating'], axis=1)
     data = data.reset_index(drop=True)
 
     return data

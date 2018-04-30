@@ -36,6 +36,15 @@ data_percentage = data_percentage.dropna()
 data_new = data_new.dropna()
 data_percentage_new = data_percentage_new.dropna()
 
+#create datasets with only useful consumption categories (old and new)
+data = data.drop(['electricity_space_heating','electricity_electric_vehicle'],axis=1)
+data_percentage = data_percentage.drop(['electricity_space_heating','electricity_electric_vehicle'],axis=1)
+
+categories_new = ['electricity_space_heating','electricity_electric_vehicle',
+                     'electricity_water_heating',
+                     'electricity_pool_or_sauna']
+
+
 
 #create model with sklearn
 def sklearn_lr_eval(data, selected_features):
@@ -74,13 +83,13 @@ def sklearn_lr_eval(data, selected_features):
 
 
 
-        df = pd.DataFrame({'consumption': selected_features.columns, 'r_squared': r_squared_column,
-                           'adjusted_r_squared': r_squared_adjusted_column,
-                           'smape': smape_column,
-                           'root_mean_squared_error': root_mean_square_error_column,
-                           'explained_variance_score': explained_variance_column},
-                          columns=['consumption', 'r_squared', 'adjusted_r_squared', 'smape',
-                                   'root_mean_squared_error', 'explained_variance_score'])
+        df = pd.DataFrame({'consumption': selected_features.columns, 'R2': r_squared_column,
+                           'Adj_R2': r_squared_adjusted_column,
+                           'SMAPE': smape_column,
+                           'RMSE': root_mean_square_error_column,
+                           'EVS': explained_variance_column},
+                          columns=['consumption', 'R2', 'Adj_R2', 'SMAPE',
+                                   'RMSE', 'EVS'])
 
         return df
 
@@ -202,15 +211,13 @@ def sklearn_SVR_eval(data, selected_features):
         root_mean_square_error_column.append(np.sqrt(mean_squared_error(y_test, predictions)))
         smape_column.append(np.mean(200 * abs(y_test - predictions) / (abs(y_test) + abs(predictions))))
 
-
-    df = pd.DataFrame({'consumption': selected_features.columns,
-                       'r_squared': r_squared_column,
-                       'adjusted_r_squared': r_squared_adjusted_column,
-                       'smape': smape_column,
-                       'root_mean_squared_error': root_mean_square_error_column,
-                       'explained_variance_score': explained_variance_column},
-                      columns=['consumption', 'r_squared', 'adjusted_r_squared', 'smape',
-                               'root_mean_squared_error', 'explained_variance_score'])
+    df = pd.DataFrame({'consumption': selected_features.columns, 'R2': r_squared_column,
+                       'Adj_R2': r_squared_adjusted_column,
+                       'SMAPE': smape_column,
+                       'RMSE': root_mean_square_error_column,
+                       'EVS': explained_variance_column},
+                      columns=['consumption', 'R2', 'Adj_R2', 'SMAPE',
+                               'RMSE', 'EVS'])
 
     return df
 
@@ -263,15 +270,13 @@ def stats_lr_eval(data, selected_features):
             model_pkl = open(model_name, 'wb')
             pickle.dump(res, model_pkl)
 
-
-    df = pd.DataFrame({'consumption' : selected_features.columns,
-                       'r_squared' : r_squared_column,
-                       'adjusted_r_squared' : r_squared_adjusted_column,
-                       'smape' : smape_column,
-                       'root_mean_squared_error' : root_mean_square_error_column,
-                       'explained_variance_score' : explained_variance_column},
-                      columns=['consumption', 'r_squared', 'adjusted_r_squared', 'smape',
-                               'root_mean_squared_error', 'explained_variance_score'])
+    df = pd.DataFrame({'consumption': selected_features.columns, 'R2': r_squared_column,
+                       'Adj_R2': r_squared_adjusted_column,
+                       'SMAPE': smape_column,
+                       'RMSE': root_mean_square_error_column,
+                       'EVS': explained_variance_column},
+                      columns=['consumption', 'R2', 'Adj_R2', 'SMAPE',
+                               'RMSE', 'EVS'])
 
     return df
 
@@ -316,15 +321,13 @@ def gradient_boosting(data, selected_features):
         root_mean_square_error_column.append(np.sqrt(mean_squared_error(y_test, predictions)))
         smape_column.append(np.mean(200 * abs(y_test - predictions) / (abs(y_test) + abs(predictions))))
 
-
-
-    df = pd.DataFrame({'consumption': selected_features.columns, 'r_squared': r_squared_column,
-                       'adjusted_r_squared': r_squared_adjusted_column,
-                       'smape': smape_column,
-                       'root_mean_squared_error': root_mean_square_error_column,
-                       'explained_variance_score': explained_variance_column},
-                      columns=['consumption', 'r_squared', 'adjusted_r_squared', 'smape',
-                               'root_mean_squared_error', 'explained_variance_score'])
+    df = pd.DataFrame({'consumption': selected_features.columns, 'R2': r_squared_column,
+                       'Adj_R2': r_squared_adjusted_column,
+                       'SMAPE': smape_column,
+                       'RMSE': root_mean_square_error_column,
+                       'EVS': explained_variance_column},
+                      columns=['consumption', 'R2', 'Adj_R2', 'SMAPE',
+                               'RMSE', 'EVS'])
 
     print(df)
 

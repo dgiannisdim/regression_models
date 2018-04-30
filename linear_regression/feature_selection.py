@@ -282,12 +282,17 @@ def select_features_new(data):
 
 
 #pca
-X = data.loc[:, 'property_size':]
-y = data['electricity_total']
-y = y.astype('int')
+def pca_method():
+    X = data.loc[:, 'property_size':]
+    y = data['electricity_total']
+    y = y.astype('int')
 
-pca = PCA(n_components=20)
-pca.fit(X)
-print(pca.explained_variance_)
-plt.plot(np.cumsum(pca.explained_variance_ratio_))
-plt.show()
+    pca = PCA(n_components=20)
+    pca.fit(X)
+    print(pca.explained_variance_)
+    plt.plot(np.cumsum(pca.explained_variance_ratio_))
+    plt.show()
+
+
+
+

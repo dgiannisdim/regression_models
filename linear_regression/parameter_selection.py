@@ -39,165 +39,341 @@ data_percentage_new = data_percentage_new.dropna()
 
 
 
-#create dataframe with metrics
-def metrics_dataframe():
-    pass
+gamma_range = 10. ** np.arange(-4, 4)
+degree_range = range(2, 5)
+coef = [0, 1]
+epsilon = [0, 0.01, 0.1, 0.5, 1, 2, 4]
 
-def stats_lr(data, selected_features):
+def SVR_parameters_c(data, selected_features):
     data = pd.get_dummies(data, drop_first=True)
-
-    r_squared_column = []
-    r_squared_adjusted_column = []
-    smape_column = []
-    explained_variance_column = []
-    root_mean_square_error_column = []
-
-
     consumption_selected = list(selected_features.loc[:, 'electricity_total'])
 
-    X = data.loc[:, consumption_selected]
-    # X = preprocessing.StandardScaler().fit_transform(X)
-    # X = sm.add_constant(X)
-    y = data['electricity_total']
+    c_range = 10. ** np.arange(-3, 7)
+    c_range2 = []
+    c_range2.append((1000))
+    for i in range(5000, 55000, 5000):
+        c_range2.append(i)
 
-    X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.25)
+    r2_column = []
+    smape_column = []
+    rmse_column = []
 
-    clf = sm.OLS(y, X)
-    res = clf.fit()
-    predictions = res.predict(X_test)
+    for c in c_range:
+
+        X = data.loc[:, consumption_selected]
+        # X = preprocessing.StandardScaler().fit_transform(X)
+        # X = sm.add_constant(X)
+        y = data['electricity_total']
+
+        X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
+                                        random_state=0, test_size=0.25)
+
+        clf = SVR(kernel='rbf', C=c, gamma=0.01)
+        clf.fit(X_train, y_train)
+        predictions = clf.predict(X_test)
 
 
-    r_squared = res.rsquared
-    r_squared_adjusted = res.rsquared_adj
-    explained_variance = explained_variance_score(y_test, predictions)
-    root_mean_square_error = np.sqrt(mean_squared_error(y_test, predictions))
-    smape = np.mean(200 * abs(y_test - predictions) / (abs(y_test) + abs(predictions)))
+        r2 = clf.score(X_test, y_test)
+        smape = np.mean(200 * abs(y_test - predictions) / (abs(y_test) + abs(predictions)))
+        rmse = np.sqrt(mean_squared_error(y_test, predictions))
 
+        r2_column.append(r2)
+        smape_column.append(smape)
+        rmse_column.append(rmse)
 
-    df = pd.DataFrame({'consumption': 'stats_lr',
-                       'r_squared': [r_squared],
-                       'adjusted_r_squared': [r_squared_adjusted],
-                       'smape': [smape],
-                       'root_mean_squared_error': [root_mean_square_error],
-                       'explained_variance_score': [explained_variance]},
-                      columns=['consumption', 'r_squared', 'adjusted_r_squared', 'smape',
-                               'root_mean_squared_error', 'explained_variance_score'])
+    df = pd.DataFrame({'C': c_range, 'R2': r2_column, 'SMAPE': smape_column, 'RMSE': rmse_column},
+                      columns=['C', 'R2', 'SMAPE', 'RMSE'])
 
     return df
 
 
 
-#print(stats_lr(data, selected_features_rfe))
-#stats_lr(data, selected_features_rfe).to_excel('test.xlsx', index=False)
+#rint(SVR_parameters_c(data, selected_features_rfe))
+SVR_parameters_c(data, selected_features_rfe).to_excel('svr_parameters_rbf_C.xlsx', index=False)
+#SVR_parameters_c(data, selected_features_rfe).to_excel('svr_parameters_rbf_C_detail.xlsx', index=False)
 
 
-def SVR_parameters(data, selected_features):
+def SVR_parameters_gamma(data, selected_features):
     data = pd.get_dummies(data, drop_first=True)
     consumption_selected = list(selected_features.loc[:, 'electricity_total'])
 
-    X = data.loc[:, consumption_selected]
-    # X = preprocessing.StandardScaler().fit_transform(X)
-    # X = sm.add_constant(X)
-    y = data['electricity_total']
+    gamma_range = 10. ** np.arange(-4, 4)
+    gamma_range2 = []
+    gamma_range2.append(0.001)
+    for i in np.arange(0.005, 0.055, 0.005):
+        gamma_range2.append(i)
 
-    X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.25)
+    r2_column = []
+    smape_column = []
+    rmse_column = []
 
-    C_range = 10. ** np.arange(-3, 5)
-    gamma_range = 10. ** np.arange(-4,4)
-    degree_range = range(2, 5)
-    kernel = ['rbf']
-    coef = [0, 1]
-    epsilon = [0, 0.01, 0.1, 0.5, 1, 2, 4]
-    param_grid = dict(kernel=kernel, C=C_range, coef0=coef, epsilon=epsilon,
-                      gamma=gamma_range, degree=degree_range)
+    for gamma in gamma_range2:
+        X = data.loc[:, consumption_selected]
+        # X = preprocessing.StandardScaler().fit_transform(X)
+        # X = sm.add_constant(X)
+        y = data['electricity_total']
 
-    plt.scatter(X_train['occupants'], y_train)
-    plt.show
-    grid = model_selection.GridSearchCV(SVR(), param_grid=param_grid, cv=5)
-    grid.fit(X, y)
+        X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
+                                        random_state=0, test_size=0.25)
 
-
-    df = pd.DataFrame(grid.grid_scores_)
-    best_par = pd.Series(grid.best_params_, name='best_parameters')
-    df = df.append(best_par)
-    print("The best classifier is: ", grid.best_params_)
+        clf = SVR(kernel='rbf', C=5000, gamma=gamma)
+        clf.fit(X_train, y_train)
+        predictions = clf.predict(X_test)
 
 
-    #create paramaeters plotand save
-    def plot_paramaeters():
-        scores = grid.cv_results_['mean_test_score'].reshape(len(C_range),
-                                                             len(degree_range))
-        plt.figure(figsize=(8, 6))
-        plt.subplots_adjust(left=.2, right=0.95, bottom=0.15, top=0.95)
-        plt.imshow(scores, interpolation='nearest', cmap=plt.cm.hot)
-        plt.xlabel('gamma')
-        plt.ylabel('C')
-        plt.colorbar()
-        plt.xticks(np.arange(len(gamma_range)), gamma_range, rotation=45)
-        plt.yticks(np.arange(len(C_range)), C_range)
-        plt.title('Validation accuracy')
-        plt.savefig('svr_parameters_rbf.png')
-        plt.close()
+        r2 = clf.score(X_test, y_test)
+        smape = np.mean(200 * abs(y_test - predictions) / (abs(y_test) + abs(predictions)))
+        rmse = np.sqrt(mean_squared_error(y_test, predictions))
+
+        r2_column.append(r2)
+        smape_column.append(smape)
+        rmse_column.append(rmse)
+
+    df = pd.DataFrame({'gamma': gamma_range2, 'R2': r2_column, 'SMAPE': smape_column, 'RMSE': rmse_column},
+                      columns=['gamma', 'R2', 'SMAPE', 'RMSE'])
+
+    return df
 
 
+#print(SVR_parameters_gamma(data, selected_features_rfe))
+#SVR_parameters_gamma(data, selected_features_rfe).to_excel('svr_parameters_gamma.xlsx', index=False)
+#SVR_parameters_gamma(data, selected_features_rfe).to_excel('svr_parameters_gamma_detail.xlsx', index=False)
 
 
-    df.to_excel('svr_parameters_rbf2.xlsx', index=False)
-    #plot_paramaeters()
-
-
-SVR_parameters(data, selected_features_rfe)
-
-
-
-def SVR_compare(data, selected_features):
+def SVR_parameters_epsilon(data, selected_features):
     data = pd.get_dummies(data, drop_first=True)
     consumption_selected = list(selected_features.loc[:, 'electricity_total'])
 
-    X = data.loc[:, consumption_selected]
-    # X = preprocessing.StandardScaler().fit_transform(X)
-    # X = sm.add_constant(X)
-    y = data['electricity_total']
+    epsilon = [0, 0.01, 0.1, 0.5, 1, 2, 4, 8, 16, 32, 64, 128]
+    epsilon2 = range(30, 130, 10)
 
-    X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.25)
+    r2_column = []
+    smape_column = []
+    rmse_column = []
 
+    for e in epsilon2:
+        X = data.loc[:, consumption_selected]
+        # X = preprocessing.StandardScaler().fit_transform(X)
+        # X = sm.add_constant(X)
+        y = data['electricity_total']
 
-    parameters = {'kernel': ('linear', 'rbf', 'poly'), 'C': [1, 5],
-                  'gamma': [1e-4, 1e4], 'epsilon': [0, 0.01, 0.1, 0.5, 1, 2, 4]}
+        X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
+                                        random_state=0, test_size=0.25)
 
-    plt.scatter(X_train['occupants'], y_train)
-    plt.show
-    clf = model_selection.GridSearchCV(SVR(), parameters, cv=5)
-    clf.fit(X, y)
-
-
-    df = pd.DataFrame(grid.grid_scores_)
-    best_par = pd.Series(grid.best_params_, name='best_parameters')
-    df = df.append(best_par)
-    print("The best classifier is: ", grid.best_params_)
+        clf = SVR(kernel='rbf', C=5000, gamma=0.025, epsilon=e)
+        clf.fit(X_train, y_train)
+        predictions = clf.predict(X_test)
 
 
-    #create paramaeters plotand save
-    def plot_paramaeters():
-        scores = grid.cv_results_['mean_test_score'].reshape(len(C_range),
-                                                             len(degree_range))
-        plt.figure(figsize=(8, 6))
-        plt.subplots_adjust(left=.2, right=0.95, bottom=0.15, top=0.95)
-        plt.imshow(scores, interpolation='nearest', cmap=plt.cm.hot)
-        plt.xlabel('degree')
-        plt.ylabel('C')
-        plt.colorbar()
-        plt.xticks(np.arange(len(degree_range)), degree_range, rotation=45)
-        plt.yticks(np.arange(len(C_range)), C_range)
-        plt.title('Validation accuracy')
-        plt.savefig('svr_parameters_poly.png')
-        plt.close()
+        r2 = clf.score(X_test, y_test)
+        smape = np.mean(200 * abs(y_test - predictions) / (abs(y_test) + abs(predictions)))
+        rmse = np.sqrt(mean_squared_error(y_test, predictions))
+
+        r2_column.append(r2)
+        smape_column.append(smape)
+        rmse_column.append(rmse)
+
+    df = pd.DataFrame({'epsilon': epsilon2, 'R2': r2_column, 'SMAPE': smape_column, 'RMSE': rmse_column},
+                      columns=['epsilon', 'R2', 'SMAPE', 'RMSE'])
+
+    return df
 
 
+#print(SVR_parameters_epsilon(data, selected_features_rfe))
+#SVR_parameters_epsilon(data, selected_features_rfe).to_excel('svr_parameters_rbf_epsilon_detail.xlsx', index=False)
 
 
-    df.to_excel('svr_parameters_compare.xlsx', index=False)
-    #plot_paramaeters()
+def SVR_parameters_poly_c(data, selected_features):
+    data = pd.get_dummies(data, drop_first=True)
+    consumption_selected = list(selected_features.loc[:, 'electricity_total'])
+
+    c_range = 10. ** np.arange(-3, 7)
+    c_range2 = []
+    c_range2.append((1000))
+    for i in range(5000, 55000, 5000):
+        c_range2.append(i)
+
+    r2_column = []
+    smape_column = []
+    rmse_column = []
+
+    for c in c_range:
+        X = data.loc[:, consumption_selected]
+        # X = preprocessing.StandardScaler().fit_transform(X)
+        # X = sm.add_constant(X)
+        y = data['electricity_total']
+
+        X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
+                                        random_state=0, test_size=0.25)
+
+        clf = SVR(kernel='poly', C=c, gamma=0.01)
+        clf.fit(X_train, y_train)
+        predictions = clf.predict(X_test)
 
 
-#SVR_compare(data, selected_features_rfe)
+        r2 = clf.score(X_test, y_test)
+        smape = np.mean(200 * abs(y_test - predictions) / (abs(y_test) + abs(predictions)))
+        rmse = np.sqrt(mean_squared_error(y_test, predictions))
+
+        r2_column.append(r2)
+        smape_column.append(smape)
+        rmse_column.append(rmse)
+
+    df = pd.DataFrame({'C': c_range, 'R2': r2_column, 'SMAPE': smape_column, 'RMSE': rmse_column},
+                      columns=['C', 'R2', 'SMAPE', 'RMSE'])
+
+    return df
+
+
+# print(SVR_parameters_poly_c(data, selected_features_rfe))
+#SVR_parameters_poly_c(data, selected_features_rfe).to_excel('svr_parameters_poly_C.xlsx', index=False)
+
+
+def SVR_parameters_poly_gamma(data, selected_features):
+    data = pd.get_dummies(data, drop_first=True)
+    consumption_selected = list(selected_features.loc[:, 'electricity_total'])
+
+    gamma_range = 10. ** np.arange(-4, 4)
+    gamma_range2 = []
+    gamma_range2.append(0.001)
+    for i in np.arange(0.005, 0.055, 0.005):
+        gamma_range2.append(i)
+
+    r2_column = []
+    smape_column = []
+    rmse_column = []
+
+    for gamma in gamma_range2:
+        X = data.loc[:, consumption_selected]
+        # X = preprocessing.StandardScaler().fit_transform(X)
+        # X = sm.add_constant(X)
+        y = data['electricity_total']
+
+        X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
+                                        random_state=0, test_size=0.25)
+
+        clf = SVR(kernel='rbf', C=5000, gamma=gamma)
+        clf.fit(X_train, y_train)
+        predictions = clf.predict(X_test)
+
+
+        r2 = clf.score(X_test, y_test)
+        smape = np.mean(200 * abs(y_test - predictions) / (abs(y_test) + abs(predictions)))
+        rmse = np.sqrt(mean_squared_error(y_test, predictions))
+
+        r2_column.append(r2)
+        smape_column.append(smape)
+        rmse_column.append(rmse)
+
+    df = pd.DataFrame({'gamma': gamma_range2, 'R2': r2_column, 'SMAPE': smape_column, 'RMSE': rmse_column},
+                      columns=['gamma', 'R2', 'SMAPE', 'RMSE'])
+
+    return df
+
+
+#print(SVR_parameters_poly_gamma(data, selected_features_rfe))
+#SVR_parameters_poly_gamma(data, selected_features_rfe).to_excel('SVR_parameters_poly_gamma.xlsx', index=False)
+#SVR_parameters_poly_gamma(data, selected_features_rfe).to_excel('SVR_parameters_poly_gamma_detail.xlsx', index=False)
+
+
+def SVR_parameters_poly_degree(data, selected_features):
+    data = pd.get_dummies(data, drop_first=True)
+    consumption_selected = list(selected_features.loc[:, 'electricity_total'])
+
+    degree_range = range(2, 6)
+
+    r2_column = []
+    smape_column = []
+    rmse_column = []
+
+    for d in degree_range:
+        X = data.loc[:, consumption_selected]
+        # X = preprocessing.StandardScaler().fit_transform(X)
+        # X = sm.add_constant(X)
+        y = data['electricity_total']
+
+        X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
+                                        random_state=0, test_size=0.25)
+
+        clf = SVR(kernel='poly', C=5000, gamma=0.025, degree=d)
+        clf.fit(X_train, y_train)
+        predictions = clf.predict(X_test)
+
+
+        r2 = clf.score(X_test, y_test)
+        smape = np.mean(200 * abs(y_test - predictions) / (abs(y_test) + abs(predictions)))
+        rmse = np.sqrt(mean_squared_error(y_test, predictions))
+
+        r2_column.append(r2)
+        smape_column.append(smape)
+        rmse_column.append(rmse)
+
+    df = pd.DataFrame({'degree': degree_range, 'R2': r2_column, 'SMAPE': smape_column, 'RMSE': rmse_column},
+                      columns=['degree', 'R2', 'SMAPE', 'RMSE'])
+
+    return df
+
+
+#print(SVR_parameters_poly_degree(data, selected_features_rfe))
+#SVR_parameters_poly_degree(data, selected_features_rfe).to_excel('svr_parameters_poly_degree.xlsx', index=False)
+
+
+def SVR_parameters_poly_epsilon(data, selected_features):
+    data = pd.get_dummies(data, drop_first=True)
+    consumption_selected = list(selected_features.loc[:, 'electricity_total'])
+
+    epsilon = [0, 0.01, 0.1, 0.5, 1, 2, 4, 8, 16, 32, 64, 128]
+    epsilon2 = range(30, 130, 10)
+
+    r2_column = []
+    smape_column = []
+    rmse_column = []
+
+    for e in epsilon2:
+        X = data.loc[:, consumption_selected]
+        # X = preprocessing.StandardScaler().fit_transform(X)
+        # X = sm.add_constant(X)
+        y = data['electricity_total']
+
+        X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
+                                        random_state=0, test_size=0.25)
+
+        clf = SVR(kernel='rbf', C=5000, gamma=0.025, epsilon=e)
+        clf.fit(X_train, y_train)
+        predictions = clf.predict(X_test)
+
+
+        r2 = clf.score(X_test, y_test)
+        smape = np.mean(200 * abs(y_test - predictions) / (abs(y_test) + abs(predictions)))
+        rmse = np.sqrt(mean_squared_error(y_test, predictions))
+
+        r2_column.append(r2)
+        smape_column.append(smape)
+        rmse_column.append(rmse)
+
+    df = pd.DataFrame({'epsilon': epsilon2, 'R2': r2_column, 'SMAPE': smape_column, 'RMSE': rmse_column},
+                      columns=['epsilon', 'R2', 'SMAPE', 'RMSE'])
+
+    return df
+
+
+#print(SVR_parameters_poly_epsilon(data, selected_features_rfe))
+#SVR_parameters_poly_epsilon(data, selected_features_rfe).to_excel('SVR_parameters_poly_epsilon_detail.xlsx', index=False)
+
+#create paramaeters plot and save
+def plot_paramaeters():
+    scores = grid.cv_results_['mean_test_score'].reshape(len(C_range),
+                                                         len(degree_range))
+    plt.figure(figsize=(8, 6))
+    plt.subplots_adjust(left=.2, right=0.95, bottom=0.15, top=0.95)
+    plt.imshow(scores, interpolation='nearest', cmap=plt.cm.hot)
+    plt.xlabel('gamma')
+    plt.ylabel('C')
+    plt.colorbar()
+    plt.xticks(np.arange(len(gamma_range)), gamma_range, rotation=45)
+    plt.yticks(np.arange(len(C_range)), C_range)
+    plt.title('Validation accuracy')
+    plt.savefig('svr_parameters_rbf.png')
+    plt.close()
+
+
