@@ -227,6 +227,9 @@ def sklearn_SVR_eval(data, selected_features):
 #create model with OLS method of statsmodels
 def stats_lr_eval(data, selected_features):
     data = pd.get_dummies(data, drop_first=True)
+    selected_features = selected_features.drop(['electricity_space_heating',
+                                                'electricity_electric_vehicle'],
+                                               axis=1)
 
     r_squared_column = []
     r_squared_adjusted_column = []
@@ -243,22 +246,17 @@ def stats_lr_eval(data, selected_features):
         #X = sm.add_constant(X)
         y = data[cf]
 
-
-
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.25)
 
         clf = sm.OLS(y,X)
         res = clf.fit()
         predictions = res.predict(X_test)
 
-
         r_squared_column.append(res.rsquared)
         r_squared_adjusted_column.append(res.rsquared_adj)
         explained_variance_column.append(explained_variance_score(y_test, predictions))
         root_mean_square_error_column.append(np.sqrt(mean_squared_error(y_test, predictions)))
         smape_column.append(np.mean(200 * abs(y_test - predictions) / (abs(y_test) + abs(predictions))))
-
-
 
         #print(res.summary())
         #print(res.params)
@@ -280,7 +278,8 @@ def stats_lr_eval(data, selected_features):
 
     return df
 
-print(stats_lr_eval(data_percentage, selected_features_rfe_percentage))
+
+#print(stats_lr_eval(data_percentage, selected_features_rfe_percentage))
 #print(stats_lr_eval(data, selected_features_rfe))
 #print(stats_lr_eval(data_new, selected_features_rfe_new))
 #print(stats_lr_eval(data_percentage_new, selected_features_rfe_percentage_new))

@@ -62,7 +62,7 @@ def random_forest_parameters_max_features(data, selected_features):
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
                                         random_state=0, test_size=0.25)
 
-        clf = RandomForestRegressor(random_state=42, max_features=m)
+        clf = RandomForestRegressor(random_state=420, max_features=m)
         clf.fit(X_train, y_train)
         predictions = clf.predict(X_test)
 
@@ -105,7 +105,7 @@ def random_forest_parameters_min_samples_split(data, selected_features):
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
                                         random_state=0, test_size=0.25)
 
-        clf = RandomForestRegressor(random_state=42,max_features='sqrt',
+        clf = RandomForestRegressor(random_state=420,max_features='sqrt',
                                     min_samples_split=m)
         clf.fit(X_train, y_train)
         predictions = clf.predict(X_test)
@@ -150,7 +150,7 @@ def random_forest_parameters_criterion(data, selected_features):
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
                                         random_state=0, test_size=0.25)
 
-        clf = RandomForestRegressor(random_state=42,max_features='sqrt',
+        clf = RandomForestRegressor(random_state=420,max_features='sqrt',
                                     min_samples_split=8, criterion=c)
         clf.fit(X_train, y_train)
         predictions = clf.predict(X_test)
@@ -195,7 +195,7 @@ def random_forest_parameters_max_depth(data, selected_features):
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
                                         random_state=0, test_size=0.25)
 
-        clf = RandomForestRegressor(random_state=42,max_features='sqrt',
+        clf = RandomForestRegressor(random_state=420,max_features='sqrt',
                                     min_samples_split=8, criterion='mse',
                                     max_depth=m)
         clf.fit(X_train, y_train)
@@ -217,7 +217,9 @@ def random_forest_parameters_max_depth(data, selected_features):
 
 
 #print(random_forest_parameters_max_depth(data, selected_features_rfe))
+#random_forest_parameters_max_depth(data, selected_features_rfe).to_excel('random_forest_parameters_max_depth.xlsx', index=False)
 #random_forest_parameters_max_depth(data, selected_features_rfe).to_excel('random_forest_parameters_max_depth_detail.xlsx', index=False)
+
 
 
 def random_forest_parameters_min_samples_leaf(data, selected_features):
@@ -241,9 +243,9 @@ def random_forest_parameters_min_samples_leaf(data, selected_features):
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
                                         random_state=0, test_size=0.25)
 
-        clf = RandomForestRegressor(random_state=42,max_features='sqrt',
+        clf = RandomForestRegressor(random_state=420,max_features='sqrt',
                                     min_samples_split=8, criterion='mse',
-                                    max_depth=12, min_samples_leaf=m)
+                                    max_depth=14, min_samples_leaf=m)
         clf.fit(X_train, y_train)
         predictions = clf.predict(X_test)
 
@@ -286,7 +288,7 @@ def random_forest_parameters_bootstrap(data, selected_features):
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
                                         random_state=0, test_size=0.25)
 
-        clf = RandomForestRegressor(random_state=42,max_features='sqrt',
+        clf = RandomForestRegressor(random_state=420,max_features='sqrt',
                                     min_samples_split=8, criterion='mse',
                                     max_depth=12, min_samples_leaf=1,
                                     bootstrap=b)
@@ -319,14 +321,14 @@ def random_forest_parameters_n_estimators(data, selected_features):
     consumption_selected = list(selected_features.loc[:, 'electricity_total'])
 
     n_estimators = 10 ** np.arange(0, 6)
-    n_estimators2 = np.arange(5, 55, 5)
+    n_estimators2 = np.arange(10000, 100000, 10000)
 
     r2_column = []
     smape_column = []
     rmse_column = []
     time_column = []
 
-    for n in n_estimators:
+    for n in n_estimators2:
         t0 = time()
         X = data.loc[:, consumption_selected]
         # X = preprocessing.StandardScaler().fit_transform(X)
@@ -336,7 +338,7 @@ def random_forest_parameters_n_estimators(data, selected_features):
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y,
                                         random_state=0, test_size=0.25)
 
-        clf = RandomForestRegressor(random_state=42,max_features='sqrt',
+        clf = RandomForestRegressor(random_state=420,max_features='sqrt',
                                     min_samples_split=8, criterion='mse',
                                     max_depth=12, min_samples_leaf=1,
                                     bootstrap=False, n_estimators=n)
@@ -353,7 +355,7 @@ def random_forest_parameters_n_estimators(data, selected_features):
         rmse_column.append(rmse)
         time_column.append(time() - t0)
 
-    df = pd.DataFrame({'n_estimators': n_estimators, 'R2': r2_column,
+    df = pd.DataFrame({'n_estimators': n_estimators2, 'R2': r2_column,
                        'SMAPE': smape_column, 'RMSE': rmse_column,
                        'Time(s)': time_column},
                       columns=['n_estimators', 'R2', 'SMAPE', 'RMSE', 'Time(s)'])
@@ -361,7 +363,7 @@ def random_forest_parameters_n_estimators(data, selected_features):
     return df
 
 
-print(random_forest_parameters_n_estimators(data, selected_features_rfe))
+#print(random_forest_parameters_n_estimators(data, selected_features_rfe))
 #random_forest_parameters_n_estimators(data, selected_features_rfe).to_excel('random_forest_parameters_n_estimators.xlsx', index=False)
 #random_forest_parameters_n_estimators(data, selected_features_rfe).to_excel('random_forest_parameters_n_estimators_detail.xlsx', index=False)
 
