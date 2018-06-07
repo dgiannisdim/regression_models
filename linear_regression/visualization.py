@@ -11,11 +11,16 @@ import seaborn as sns
 pd.set_option('display.max_columns', 99)
 pd.set_option('display.max_row', 999)
 
-#read csv files
-data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged.csv')
-data_percentage = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage.csv')
-data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_new.csv')
-data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage_new.csv')
+# Import old datasets
+data = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/final_dataset_merged.csv')
+data_percentage = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/final_dataset_merged_percentage.csv')
+selected_features_rfe = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/selected_features_rfe.csv')
+selected_features_rfe_percentage = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/selected_features_rfe_percentage.csv')
+
+
+# Import new datasets
+data_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/final_dataset_merged_new.csv')
+data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/final_dataset_merged_percentage_new.csv')
 
 
 #sort drop NaN values
@@ -80,7 +85,7 @@ def scatter_plots(data):
 
         plt.show()
 
-#scatter_plots(data)
+scatter_plots(data_new)
 
 
 def correlation_matrix(data):

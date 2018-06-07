@@ -15,20 +15,15 @@ pd.set_option('display.max_columns', 99)
 pd.set_option('display.max_row', 999)
 
 #import old datasets
-data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged.csv')
-data_percentage = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage.csv')
-selected_features_rfe = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe.csv')
-selected_features_random_forest = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_random_forest.csv')
-selected_features_rfe_percentage = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_percentage.csv')
-selected_features_random_forest_percentage = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_random_forest_percentage.csv')
+data = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/final_dataset_merged.csv')
+data_percentage = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/final_dataset_merged_percentage.csv')
+selected_features_rfe = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/selected_features_rfe.csv')
+selected_features_rfe_percentage = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/selected_features_rfe_percentage.csv')
+
 
 #import new datasets
-data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_new.csv')
-data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage_new.csv')
-selected_features_rfe_new = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_new.csv')
-selected_features_rfe_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_percentage_new.csv')
-
-selected_features_rfe_new2 = pd.read_csv(r'C:\regression_models\linear_regression/selected_features_rfe_new2.csv')
+data_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/final_dataset_merged_new.csv')
+data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/final_dataset_merged_percentage_new.csv')
 
 
 data = data.dropna()
@@ -45,6 +40,7 @@ categories_new = ['electricity_space_heating','electricity_electric_vehicle',
                      'electricity_pool_or_sauna']
 
 
+selected_features_rfe = selected_features_rfe.drop(['electricity_space_heating', 'electricity_electric_vehicle'], axis=1)
 
 #create model with sklearn
 def sklearn_lr_eval(data, selected_features):
@@ -262,8 +258,8 @@ def stats_lr_eval(data, selected_features):
         #print(res.params)
 
         # save the model
-        switch = False
-        if switch:
+        save_switch = False
+        if save_switch:
             model_name = cf + '_percentage_model_stats_lr.pkl'
             model_pkl = open(model_name, 'wb')
             pickle.dump(res, model_pkl)
@@ -306,7 +302,7 @@ def gradient_boosting(data, selected_features):
 
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, y, test_size=0.25)
 
-        params = {'n_estimators': 500, 'max_depth': 4, 'min_samples_split': 2,
+        params = {'random_state' : 0, 'n_estimators': 500, 'max_depth': 4, 'min_samples_split': 2,
                   'learning_rate': 0.01, 'loss': 'ls'}
         clf = ensemble.GradientBoostingRegressor(**params)
 
@@ -323,15 +319,14 @@ def gradient_boosting(data, selected_features):
     df = pd.DataFrame({'consumption': selected_features.columns, 'R2': r_squared_column,
                        'Adj_R2': r_squared_adjusted_column,
                        'SMAPE': smape_column,
-                       'RMSE': root_mean_square_error_column,
-                       'EVS': explained_variance_column},
+                       'RMSE': root_mean_square_error_column},
                       columns=['consumption', 'R2', 'Adj_R2', 'SMAPE',
-                               'RMSE', 'EVS'])
+                               'RMSE'])
 
     print(df)
 
 
-#gradient_boosting(data, selected_features_rfe_percentage)
+#gradient_boosting(data, selected_features_rfe)
 
 #write model results to excel files
 '''
@@ -351,40 +346,4 @@ sklearn_SVR_eval(data_percentage, selected_features_rfe_percentage).to_excel('sk
 
 '''
 
-
-
-
-'''
-#create model with formula method of statsmodels
-
-mod = smf.ols(formula='electricity_cooking ~ oven + microwave + occupants + occupant_type'
-              , data=data)
-res = mod.fit()
-
-print(res.summary())
-'''
-
-
-#create model with formula method of statsmodels (flexible)
-def stats_formula_lr(data):
-    y = 'electricity_total ~ '
-    X = ''
-
-    for f in data.columns[15:20 ]:
-        X = X + f + ' + '
-
-    X = X[:-3]
-    formula = y + X
-    formula = "'" + formula + "'"
-    print(formula)
-
-    mod = smf.ols(formula=formula, data=data)
-    res = mod.fit()
-    print(res.summary())
-
-
-
-
-
-#print(model.predict([[0, 1, 1]]))
 

@@ -26,10 +26,21 @@ pd.set_option('display.max_row', 999)
 
 
 #read csv files
-data = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged.csv')
-data_percentage = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage.csv')
-data_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_new.csv')
-data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression/final_dataset_merged_percentage_new.csv')
+data = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/final_dataset_merged.csv')
+data_percentage = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/final_dataset_merged_percentage.csv')
+data_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/final_dataset_merged_new.csv')
+data_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/final_dataset_merged_percentage_new.csv')
+
+
+electricity_space_heating_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/electricity_space_heating_new.csv')
+electricity_water_heating_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/electricity_water_heating_new.csv')
+electricity_electric_vehicle_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/electricity_electric_vehicle_new.csv')
+electricity_pool_or_sauna_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/electricity_pool_or_sauna_new.csv')
+
+electricity_space_heating_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/electricity_space_heating_percentage_new.csv')
+electricity_water_heating_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/electricity_water_heating_percentage_new.csv')
+electricity_electric_vehicle_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/electricity_electric_vehicle_percentage_new.csv')
+electricity_pool_or_sauna_percentage_new = pd.read_csv(r'C:\regression_models\linear_regression\merged_datasets/electricity_pool_or_sauna_percentage_new.csv')
 
 
 #sort drop NaN values
@@ -229,55 +240,56 @@ def select_features(data):
 
 
 
+features = ['electricity_space_heating', 'electricity_water_heating',
+   'electricity_electric_vehicle', 'electricity_pool_or_sauna']
+
+#create dataframe with most importand features for every consumption based on rfe methods
+selected_features_rfe = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
+
 #select features with different methods and write to csv
 def select_features_new(data):
+    data = pd.get_dummies(data, drop_first=True)
+    # split dataset into independent and dependent variables
+    consumption = data.columns
+    X = data.loc[:, 'property_size':]
+    y = data[consumption[0]]
+    y = y.astype('int')
+
+    ## rfe dataframe
+    # how many times a feature was chosen
+    list_of_all_indices = np.concatenate((kbest(X, y), rfe_selector_svr(X, y),
+                                          rfe_selector_lr(X, y),
+                                          rfe_selector_random_forest(X, y),
+                                          lasso(X, y),
+                                          select_from_model_extra_trees(X, y)),
+                                          axis=0)
+    list_of_all_indices = pd.Series(list_of_all_indices)
 
 
-    features = ['electricity_space_heating', 'electricity_water_heating',
-       'electricity_electric_vehicle', 'electricity_pool_or_sauna']
-
-    #create dataframe with most importand features for every consumption based on rfe methods
-    selected_features_rfe = pd.DataFrame(np.nan, index=range(0, 30), columns=features)
-
-    for f in features:
-        # split dataset into independent and dependent variables
-        X = data.loc[:, 'property_size':]
-        y = data[f]
-        y = y.astype('int')
+    importand_features = list_of_all_indices.value_counts().index.tolist()
 
 
-        ## rfe dataframe
-        # how many times a feature was chosen
-        list_of_all_indices = np.concatenate((kbest(X, y), rfe_selector_svr(X, y),
-                                              rfe_selector_lr(X, y),
-                                              rfe_selector_random_forest(X, y),
-                                              lasso(X, y),
-                                              select_from_model_extra_trees(X, y)),
-                                              axis=0)
-        list_of_all_indices = pd.Series(list_of_all_indices)
-
-
-        importand_features = list_of_all_indices.value_counts().index.tolist()
-
-
-        # create dataframe with most importand features of each consumption variable
-        selected_features_rfe[f] = importand_features[0:30]
-
-        print('#################################################')
-        print('#################################################')
-        print('#################################################')
-        print('\n')
-        print('\n')
-
-
+    # create dataframe with most importand features of each consumption variable
+    selected_features_rfe = importand_features[0:30]
 
 
     return selected_features_rfe
 
-
 #new dataset
-#select_features_new(data_new).to_csv('selected_features_rfe_new2.csv', index=False)
-#select_features_new(data_percentage_new).to_csv('selected_features_rfe_percentage_new2.csv', index=False)
+selected_features_rfe['electricity_space_heating'] = select_features_new(electricity_space_heating_new)
+selected_features_rfe['electricity_water_heating'] = select_features_new(electricity_water_heating_new)
+selected_features_rfe['electricity_electric_vehicle'] = select_features_new(electricity_electric_vehicle_new)
+selected_features_rfe['electricity_pool_or_sauna'] = select_features_new(electricity_pool_or_sauna_new)
+
+#selected_features_rfe.to_csv('selected_features_new.csv', index=False)
+
+
+selected_features_rfe['electricity_space_heating'] = select_features_new(electricity_space_heating_percentage_new)
+selected_features_rfe['electricity_water_heating'] = select_features_new(electricity_water_heating_percentage_new)
+selected_features_rfe['electricity_electric_vehicle'] = select_features_new(electricity_electric_vehicle_percentage_new)
+selected_features_rfe['electricity_pool_or_sauna'] = select_features_new(electricity_pool_or_sauna_percentage_new)
+
+#selected_features_rfe.to_csv('selected_features_percentage_new.csv', index=False)
 #df.to_excel('selected_features_percentage.xlsx', index=False)
 
 
